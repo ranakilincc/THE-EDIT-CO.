@@ -1,0 +1,629 @@
+﻿@{
+    ViewData["Title"] = "Anasayfa";
+}
+
+<style>
+    /* 1. KESİN ÇÖZÜM IZGARA SİSTEMİ */
+    .ozel-urun-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* Yan yana 4 tane */
+        gap: 20px; /* Araları açık olsun */
+        margin-top: 20px;
+        margin-bottom: 60px; /* Kategoriler arası boşluk */
+    }
+
+
+    /* 2. ÜRÜN KUTUSU */
+    .urun-karti-yeni {
+        border: 1px solid #eaeaea; /* İncecik gri çerçeve */
+        background: white;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s;
+    }
+
+        .urun-karti-yeni:hover {
+            border-color: #000; /* Üzerine gelince çerçeve siyah olsun */
+        }
+
+    /* 3. RESİM AYARI (EN ÖNEMLİ KISIM) */
+    .resim-cercevesi {
+        width: 100%;
+        height: 350px; /* Yükseklik SABİT */
+        overflow: hidden;
+        background-color: #f9f9f9;
+        position: relative;
+    }
+
+        .resim-cercevesi img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover; /* Resmi kutuya tam doldur */
+            display: block;
+        }
+
+    /* 4. YAZILAR VE DETAYLAR */
+    .urun-bilgileri {
+        padding: 15px;
+        text-align: left;
+    }
+
+    .marka-adi {
+        font-size: 11px;
+        font-weight: 800;
+        color: black;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+        letter-spacing: 0.5px;
+    }
+
+    .urun-ismi {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+        line-height: 1.3;
+        height: 38px; /* İsimler uzun olsa da hizayı bozmasın */
+        overflow: hidden;
+    }
+
+    .urun-fiyati {
+        font-size: 16px;
+        font-weight: 900;
+        color: black;
+        margin-top: 10px;
+    }
+
+    /* Kategori Başlıkları */
+    .kategori-baslik {
+        border-bottom: 2px solid #E6A4B4; /* Pembe Çizgi */
+        display: inline-block;
+        font-weight: 800;
+        margin-bottom: 10px;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+
+    /* Filtre Menüsü Kapsayıcısı */
+.filtre-menusu-kapsayici {
+    position: relative;
+    display: inline-block;
+}
+
+/* Açılır Menü Kutusu (Başlangıçta Gizli) */
+.filtre-dropdown-icerik {
+    display: none; /* Gizli */
+    position: absolute;
+    right: 0; /* Sağa yasla */
+    top: 35px; /* Simgenin biraz altından başla */
+    background-color: #fff;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 100; /* Diğer her şeyin üstünde olsun */
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Menü Linkleri */
+.filtre-dropdown-icerik a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-bottom: 1px solid #f1f1f1;
+    transition: background-color 0.3s;
+}
+
+    /* Linklerin Üzerine Gelince */
+.filtre-dropdown-icerik a:hover {
+    background-color: #f9f9f9;
+    color: #e0a6aa; /* Pembe renk */
+    }
+
+
+    /* Menü Açıldığında Göster */
+.show {
+    display: block;
+    animation: menuyuAc 0.3s ease-out; /* Açılma efekti */
+}
+
+/* Hafifçe yukarıdan aşağıya açılma efekti */
+@@keyframes menuyuAc {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+    /* Sepet Sayacı Tasarımı */
+    .sepet-badge {
+        background-color: #e0a6aa; /* Senin temanın pembe rengi */
+        color: white; /* Yazı rengi beyaz */
+        border-radius: 50%; /* Tam yuvarlak olsun */
+        padding: 2px 6px; /* İçindeki boşluk */
+        font-size: 0.75rem; /* Yazı boyutu */
+        font-weight: bold; /* Kalın yazı */
+        /* Konumlandırma Ayarları */
+        position: absolute; /* İkonun üzerine yapışması için */
+        top: -2px; /* Biraz yukarı */
+        right: -2px; /* Biraz sağa */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Hafif gölge */
+    }
+
+</style>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>
+            Cildinizi <br />
+            <span>'Editleyin'</span>
+        </h1>
+        <a href="/#urunler" class="hero-btn">
+            Alışverişe Başla
+        </a>
+    </div>
+</section>
+
+
+<section id="urunler" class="section container mt-5">
+
+    <div class="urunler-baslik-kapsayici" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;">
+
+        <h2 class="section-title" style="margin: 0;">ÜRÜNLERİMİZ</h2>
+        <div class="filtre-menusu-kapsayici">
+
+            <div class="filtre-simgesi" onclick="menuyuAcKapat()">
+                <i class="fa-solid fa-sliders" style="font-size: 24px; color: #333; cursor: pointer;"></i>
+            </div>
+
+            <div id="filtre-dropdown" class="filtre-dropdown-icerik">
+                <a href="#serumlar" onclick="menuyuKapat()">Serumlar</a>
+                <a href="#gunes-kremleri" onclick="menuyuKapat()">Güneş Kremleri</a>
+                <a href="#temizleme-jelleri" onclick="menuyuKapat()">Temizleme Jelleri</a>
+                <a href="#nemlendiriciler" onclick="menuyuKapat()">Nemlendiriciler</a>
+                <a href="#tonikler" onclick="menuyuKapat()">Tonikler</a>
+                <a href="#yeni-gelenler" onclick="menuyuKapat()">Yeni Gelenler</a>
+                <a href="#kampanyalar" onclick="menuyuKapat()">Kampanyalar</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <h4 class="kategori-baslik" id="serumlar">SERUMLAR</h4>
+
+    <div class="ozel-urun-grid">
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=serum1">
+                    <img src="~/images/serumlar/serum1.png" alt="Serum">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Aydınlatıcı Serum</div>
+                <div class="urun-fiyati">899 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=serum2">
+				<img src="~/images/serumlar/serum2.png" alt="Serum">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Nem Serumu (Hyaluronik Asit)</div>
+                <div class="urun-fiyati">420 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=serum33">
+				<img src="~/images/serumlar/serum33.png" alt="Serum">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">C Vitamini Canlandırıcı</div>
+                <div class="urun-fiyati">480 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=serum4">
+				<img src="~/images/serumlar/serum4.png" alt="Serum">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Retinol Gece Bakım Serumu</div>
+                <div class="urun-fiyati">1.250 TL</div>
+            </div>
+        </div>
+    </div>
+
+
+    <h4 class="kategori-baslik" id="tonikler">TONİKLER</h4>
+
+    <div class="ozel-urun-grid">
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=tonik1">
+				<img src="~/images/tonik/tonik1.png" alt="Tonik">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Gözenek Sıkılaştırıcı Tonik</div>
+                <div class="urun-fiyati">350 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=tonik2">
+				<img src="~/images/tonik/tonik2.png" alt="Tonik">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Aydınlatıcı Vitamin Tonik</div>
+                <div class="urun-fiyati">380 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=tonik3">
+				<img src="~/images/tonik/tonik3.png" alt="Tonik">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Yatıştırıcı Gül Suyu Tonik</div>
+                <div class="urun-fiyati">290 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=tonik44">
+				<img src="~/images/tonik/tonik44.png" alt="Tonik">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Matlaştırıcı Tonik</div>
+                <div class="urun-fiyati">320 TL</div>
+            </div>
+        </div>
+    </div>
+
+
+    <h4 class="kategori-baslik" id="gunes-kremleri">GÜNEŞ KREMLERİ</h4>
+
+    <div class="ozel-urun-grid">
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=gunes1">
+				<img src="~/images/güneş kremi/guneskremi1.png" alt="Güneş Kremi">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">50 SPF Yüksek Koruma</div>
+                <div class="urun-fiyati">550 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=gunes2">
+				<img src="~/images/güneş kremi/güneskremi2.png" alt="Güneş Kremi">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Leke Karşıtı Güneş Kremi</div>
+                <div class="urun-fiyati">600 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=gunes3">
+				<img src="~/images/güneş kremi/guneskremi3.png" alt="Güneş Kremi">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Renkli Güneş Kremi (Tinted)</div>
+                <div class="urun-fiyati">580 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=gunes4">
+				<img src="~/images/güneş kremi/güneskremi4.png" alt="Güneş Kremi">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Stick Güneş Koruyucu</div>
+                <div class="urun-fiyati">350 TL</div>
+            </div>
+        </div>
+    </div>
+
+
+    <h4 class="kategori-baslik" id="temizleme-jelleri">YÜZ TEMİZLEME JELİ</h4>
+
+    <div class="ozel-urun-grid">
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=jel11">
+				<img src="~/images/yüz temizleme jeli/yüztemizlemejeli11.png" alt="Jel">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Arındırıcı Temizleme Jeli</div>
+                <div class="urun-fiyati">280 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=jel22">
+				<img src="~/images/yüz temizleme jeli/yüztemizlemejeli22.png" alt="Jel">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Köpük Temizleyici</div>
+                <div class="urun-fiyati">320 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=jel3">
+				<img src="~/images/yüz temizleme jeli/yüztemizlemejei3.png" alt="Jel">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Hassas Ciltler İçin Jel</div>
+                <div class="urun-fiyati">300 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=jel4">
+				<img src="~/images/yüz temizleme jeli/yüztemizlemejeli4.png" alt="Jel">
+                <</a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Yağ Bazlı Temizleyici</div>
+                <div class="urun-fiyati">350 TL</div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="kategori-baslik" id="nemlendiriciler">NEMLENDİRİCİLER</h4>
+
+    <div class="ozel-urun-grid">
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=nem1">
+				<img src="~/images/nemlendirici/nemlendirici1.png" alt="Nemlendirici">
+                <</a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Su Bazlı Nemlendirici</div>
+                <div class="urun-fiyati">400 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=nem2">
+				<img src="~/images/nemlendirici/nemlendirici2.png" alt="Nemlendirici">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Yoğun Bakım Kremi</div>
+                <div class="urun-fiyati">450 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=nem33">
+				<img src="~/images/nemlendirici/nemlendirici33.png" alt="Nemlendirici">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Gece Maskesi</div>
+                <div class="urun-fiyati">480 TL</div>
+            </div>
+        </div>
+        <div class="urun-karti-yeni">
+            <div class="resim-cercevesi">
+                <a href="/urun-detay.html?kod=nem4">
+				<img src="~/images/nemlendirici/nemlendirici4.png" alt="Nemlendirici">
+                </a>
+            </div>
+            <div class="urun-bilgileri">
+                <div class="marka-adi">THE EDIT CO.</div>
+                <div class="urun-ismi">Onarıcı Cica Krem</div>
+                <div class="urun-fiyati">390 TL</div>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+
+<section id="yeni-gelenler" class="section soft-bg py-5" style="background-color: #f9f9f9;">
+    <div class="container">
+        <h2 class="text-center mb-5" id="yeni-gelenler">Yeni Gelenler</h2>
+        <div class="ozel-urun-grid">
+            <div class="urun-karti-yeni">
+                <div class="resim-cercevesi">
+                    <a href="/urun-detay.html?kod=nem33">
+                    <img src="~/images/nemlendirici/nemlendirici33.png" alt="Nemlendirici">
+                    <</a>
+                </div>
+                <div class="urun-bilgileri">
+                    <div class="marka-adi">THE EDIT CO.</div>
+                    <div class="urun-ismi">Gece Maskesi</div>
+                    <div class="urun-fiyati">480 TL</div>
+                </div>
+            </div>
+            <div class="urun-karti-yeni">
+                <div class="resim-cercevesi">
+                    <a href="/urun-detay.html?kod=serum2">
+                    <img src="~/images/serumlar/serum2.png" alt="Serum">
+                    </a>
+                </div>
+                <div class="urun-bilgileri">
+                    <div class="marka-adi">THE EDIT CO.</div>
+                    <div class="urun-ismi">Nem Serumu (Hyaluronik Asit)</div>
+                    <div class="urun-fiyati">420 TL</div>
+                </div>
+            </div>
+            <div class="urun-karti-yeni">
+                <div class="resim-cercevesi">
+                    <a href="/urun-detay.html?kod=tonik44">
+                    <img src="~/images/tonik/tonik44.png" alt="Tonik">
+                    </a>
+                </div>
+                <div class="urun-bilgileri">
+                    <div class="marka-adi">THE EDIT CO.</div>
+                    <div class="urun-ismi">Matlaştırıcı Tonik</div>
+                    <div class="urun-fiyati">320 TL</div>
+                </div>
+            </div>
+            <div class="urun-karti-yeni">
+                <div class="resim-cercevesi">
+                    <a href="/urun-detay.html?kod=jel22">
+                    <img src="~/images/yüz temizleme jeli/yüztemizlemejeli22.png" alt="Jel">
+                    </a>
+                </div>
+                <div class="urun-bilgileri">
+                    <div class="marka-adi">THE EDIT CO.</div>
+                    <div class="urun-ismi">Köpük Temizleyici</div>
+                    <div class="urun-fiyati">320 TL</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="kampanyalar" class="section container py-5">
+    <h2 class="text-center mb-4" id="kampanyalar">Kampanyalar</h2>
+    <div id="slider-kapsayici" style="width: 100%; margin: 0 auto; overflow: hidden; position: relative; border-radius: 20px;">
+
+        <div id="slider-serit" style="display: flex; width: 100%; transition: transform 1s ease-in-out;">
+
+            <a href="#" style="min-width: 100%; display: block;">
+				<img src="~/images/kampanya/nemlendiricilerkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 1">
+            </a>
+
+            <a href="#" style="min-width: 100%; display: block;">
+				<img src="~/images/kampanya/serumlarkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 2">
+            </a>
+
+            <a href="#" style="min-width: 100%; display: block;">
+				<img src="~/images/kampanya/yuzjelikampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 3">
+            </a>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    //kampanyalar sliderı
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Gerekli elementleri seçiyoruz
+        var serit = document.getElementById("slider-serit");
+        var slaytlar = serit.getElementsByTagName("a"); // Resimler 'a' etiketi içinde
+        var toplamSlayt = slaytlar.length;
+        var aktifSlayt = 0; // Başlangıçta 0. slayt (ilk resim)
+
+        // 2. Slayt Değiştirme Fonksiyonu
+        function slaytDegistir() {
+            aktifSlayt++; // Sıradaki slayta geç
+
+            // Eğer son slayta geldiysek, başa (0'a) dön
+            if (aktifSlayt >= toplamSlayt) {
+                aktifSlayt = 0;
+            }
+
+            // Şeridi sola doğru kaydır (%0, -%100, -%200...)
+            var kaydirmaMiktari = -(aktifSlayt * 100);
+            serit.style.transform = "translateX(" + kaydirmaMiktari + "%)";
+        }
+
+        // 3. Zamanlayıcıyı Başlat (5000ms = 5 Saniye)
+        setInterval(slaytDegistir, 5000);
+    });
+</script>
+
+<script>
+    //filtreleme menüsünün açılıp kapanması ile ilgili bir kod//
+    function menuyuAcKapat() {
+        var menu = document.getElementById("filtre-dropdown");
+        if (menu) {
+            menu.classList.toggle("show");
+        } else {
+            console.error("Hata: 'filtre-dropdown' id'li kutu bulunamadı.");
+        }
+    }
+</script>
+
+
+<script>
+    function sepeteEkle(tiklananButon) {
+        var resim, ad, fiyat;
+
+        // YENİ YÖNTEM: Butonun üzerindeki gizli verileri (data-) oku
+        if (tiklananButon.dataset.ad && tiklananButon.dataset.resim) {
+            ad = tiklananButon.dataset.ad;
+            resim = tiklananButon.dataset.resim;
+            fiyat = tiklananButon.dataset.fiyat;
+        }
+        // ESKİ YÖNTEM: Kart yapısından bul (Anasayfa için)
+        else {
+            var urunKutusu = tiklananButon.closest('.urun-kutusu, .card, .col');
+            if (urunKutusu) {
+                var resimEl = urunKutusu.querySelector('img');
+                var adEl = urunKutusu.querySelector('h4, h5, .card-title');
+                var fiyatEl = urunKutusu.querySelector('.fiyat, .price, span b');
+
+                resim = resimEl ? resimEl.src : "";
+                ad = adEl ? adEl.innerText : "";
+                fiyat = fiyatEl ? fiyatEl.innerText : "";
+            }
+        }
+
+        // Eğer veriler boş geldiyse hata var demektir
+        if (!ad || !resim) {
+            alert("HATA: Ürün bilgileri okunamadı! F12 Console'a bak.");
+            console.log("Gelen veriler:", { ad, resim, fiyat });
+            return;
+        }
+
+        // Sepete Ekleme İşlemi
+        var yeniUrun = { resim: resim, ad: ad, fiyat: fiyat, adet: 1 };
+        var sepet = JSON.parse(localStorage.getItem('sepetim')) || [];
+        sepet.push(yeniUrun);
+        localStorage.setItem('sepetim', JSON.stringify(sepet));
+        localStorage.setItem('sepetSayisi', sepet.length);
+
+        // Bildirim ve Güncelleme
+        guncelleSepetSayisi();
+        alert("Sepete eklendi!");
+    }
+
+</script>
+
+

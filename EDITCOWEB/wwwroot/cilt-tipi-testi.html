@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cilt Tipini Öğren - The Edit Co.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- GENEL SAYFA TASARIMI --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            /* Arka plan: Çok açık toz pembe */
+            background-color: #fce4ec;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- BEYAZ KUTU --- */
+        .test-kutusu {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        /* --- BAŞLIKLAR --- */
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* --- BUTONLAR (ŞIKLAR) --- */
+        .sik-butonu {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin: 10px 0;
+            background-color: white;
+            border: 2px solid #eee;
+            border-radius: 50px; /* Yuvarlak kenarlar */
+            color: black;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+            /* Mouse Üzerine Gelince (HOVER) - İsteğin üzerine Toz Pembe */
+            .sik-butonu:hover {
+                background-color: #e0a6aa; /* Senin temanın pembesi */
+                border-color: #e0a6aa;
+                color: white;
+                padding-left: 30px; /* Hafif sağa kayma efekti */
+                font-weight: bold;
+            }
+
+        /* İlerleme Çubuğu */
+        .progress-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #e0a6aa;
+            width: 0%;
+            transition: width 0.4s;
+        }
+
+        /* Gizleme/Gösterme */
+        .gizli {
+            display: none;
+        }
+
+        /* Sonuç Alanı */
+        .sonuc-baslik {
+            color: #e0a6aa;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .tekrar-btn {
+            background-color: #333;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+            .tekrar-btn:hover {
+                background-color: black;
+            }
+
+        .nav-link-don {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="test-kutusu">
+        <a href="/" class="nav-link-don">Ana Sayfaya Dön</a>
+
+        <div id="giris-ekrani">
+            <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 50px; color: #e0a6aa; margin-bottom: 20px;"></i>
+            <h2>Cilt Tipini Keşfet</h2>
+            <p>Sadece 7 soruda cildinin neye ihtiyacı olduğunu öğrenmeye hazır mısın? Doğru ürünleri seçmek için önce cildini tanıman gerekir.</p>
+            <button class="tekrar-btn" onclick="testiBaslat()" style="background-color: #e0a6aa;">Teste Başla</button>
+        </div>
+
+        <div id="soru-ekrani" class="gizli">
+            <div class="progress-container">
+                <div id="cubuk" class="progress-bar"></div>
+            </div>
+
+            <h3 id="soru-metni" style="margin-bottom: 25px;">Soru buraya gelecek...</h3>
+            <div id="siklar-alani">
+            </div>
+        </div>
+
+        <div id="sonuc-ekrani" class="gizli">
+            <i class="fa-regular fa-face-smile-beam" style="font-size: 60px; color: #e0a6aa; margin-bottom: 20px;"></i>
+            <h3>Senin Cilt Tipin:</h3>
+            <h1 id="sonuc-baslik" class="sonuc-baslik">Normal</h1>
+            <p id="sonuc-aciklama">Cildin oldukça dengeli görünüyor.</p>
+
+            <div style="margin-top: 30px; padding: 20px; background: #fff0f1; border-radius: 10px;">
+                <strong>💡 Sana Önerimiz:</strong>
+                <p id="sonuc-oneri" style="font-size: 0.95rem; margin-top: 5px;">...</p>
+            </div>
+
+            <button class="tekrar-btn" onclick="location.reload()">Testi Tekrar Çöz</button>
+            <a id="sonuc-linki" href="/#urunler" class="tekrar-btn" style="background-color: #e0a6aa; text-decoration: none; display: inline-block;">Ürünleri İncele</a>
+        </div>
+    </div>
+
+    <script>
+        // SORULAR VE ŞIKLAR
+        // A=Yağlı, B=Kuru, C=Karma, D=Normal, E=Hassas
+        const sorular = [
+            {
+                soru: "🧴 1. Cildin gün içinde nasıl hissediyor?",
+                siklar: [
+                    { metin: "A) Gün boyu parlak ve yağlı", puan: "yagli" },
+                    { metin: "B) Gergin ve pul pul", puan: "kuru" },
+                    { metin: "C) T bölgesi yağlı, yanaklar kuru", puan: "karma" },
+                    { metin: "D) Ne çok yağlı ne çok kuru", puan: "normal" },
+                    { metin: "E) Kolayca kızarıyor / yanma oluyor", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "💦 2. Yüzünü yıkadıktan sonra cildin nasıl oluyor?",
+                siklar: [
+                    { metin: "A) Kısa sürede tekrar yağlanıyor", puan: "yagli" },
+                    { metin: "B) Kuruyor ve geriliyor", puan: "kuru" },
+                    { metin: "C) Bazı bölgeler kuru, bazıları normal", puan: "karma" },
+                    { metin: "D) Rahat ve dengeli hissediyorum", puan: "normal" },
+                    { metin: "E) Kızarıyor veya kaşınıyor", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "🌡️ 3. Hava değişimlerinde (soğuk/sıcak) tepkisi?",
+                siklar: [
+                    { metin: "A) Daha çok yağlanıyor", puan: "yagli" },
+                    { metin: "B) Daha çok kuruyor", puan: "kuru" },
+                    { metin: "C) Bölgesel değişiyor", puan: "karma" },
+                    { metin: "D) Pek değişiklik olmuyor", puan: "normal" },
+                    { metin: "E) Hemen kızarıyor / tahriş oluyor", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "🧼 4. Gözeneklerin nasıl?",
+                siklar: [
+                    { metin: "A) Belirgin ve geniş", puan: "yagli" },
+                    { metin: "B) Çok küçük / neredeyse yok", puan: "kuru" },
+                    { metin: "C) T bölgesinde belirgin", puan: "karma" },
+                    { metin: "D) Normal boyutta", puan: "normal" },
+                    { metin: "E) Gözeneklerle birlikte kızarıklık var", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "💄 5. Makyaj veya krem sürdüğünde ne oluyor?",
+                siklar: [
+                    { metin: "A) Kısa sürede akıyor / parlıyor", puan: "yagli" },
+                    { metin: "B) Cildim ürünü hemen emiyor", puan: "kuru" },
+                    { metin: "C) Bazı yerlerde iyi, bazılarında kötü", puan: "karma" },
+                    { metin: "D) Uzun süre dengeli duruyor", puan: "normal" },
+                    { metin: "E) Yanma veya kızarıklık yapıyor", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "😣 6. Sivilce ve siyah nokta durumu",
+                siklar: [
+                    { metin: "A) Sık sık oluyor", puan: "yagli" },
+                    { metin: "B) Çok nadir", puan: "kuru" },
+                    { metin: "C) Genelde T bölgesinde", puan: "karma" },
+                    { metin: "D) Nadiren", puan: "normal" },
+                    { metin: "E) Olunca çok kızarıyor", puan: "hassas" }
+                ]
+            },
+            {
+                soru: "🔥 7. Yeni bir ürün denediğinde tepkisi?",
+                siklar: [
+                    { metin: "A) Genelde sorun olmaz ama yağlanır", puan: "yagli" },
+                    { metin: "B) Kuruluk yapabilir", puan: "kuru" },
+                    { metin: "C) Bazı bölgelerde sorun çıkar", puan: "karma" },
+                    { metin: "D) Genelde sorun yaşamam", puan: "normal" },
+                    { metin: "E) Çoğu zaman tahriş olur", puan: "hassas" }
+                ]
+            }
+        ];
+
+        let aktifSoruIndex = 0;
+        // Puanları tutacağımız yer
+        let skorlar = { yagli: 0, kuru: 0, karma: 0, normal: 0, hassas: 0 };
+
+        function testiBaslat() {
+            document.getElementById("giris-ekrani").classList.add("gizli");
+            document.getElementById("soru-ekrani").classList.remove("gizli");
+            soruyuGetir();
+        }
+
+        function soruyuGetir() {
+            let soruObj = sorular[aktifSoruIndex];
+
+            // Soruyu yaz
+            document.getElementById("soru-metni").innerText = soruObj.soru;
+
+            // Şıkları temizle ve yeniden oluştur
+            let siklarDiv = document.getElementById("siklar-alani");
+            siklarDiv.innerHTML = "";
+
+            soruObj.siklar.forEach(sik => {
+                let btn = document.createElement("button");
+                btn.className = "sik-butonu";
+                btn.innerText = sik.metin;
+                // Tıklayınca cevabı kaydet ve ilerle
+                btn.onclick = function() { cevapVer(sik.puan); };
+                siklarDiv.appendChild(btn);
+            });
+
+            // İlerleme çubuğunu güncelle
+            let yuzde = ((aktifSoruIndex) / sorular.length) * 100;
+            document.getElementById("cubuk").style.width = yuzde + "%";
+        }
+
+        function cevapVer(puanTuru) {
+            // Seçilen türün puanını artır
+            skorlar[puanTuru]++;
+
+            aktifSoruIndex++;
+
+            if (aktifSoruIndex < sorular.length) {
+                soruyuGetir();
+            } else {
+                sonucuGoster();
+            }
+        }
+
+        function sonucuGoster() {
+            document.getElementById("soru-ekrani").classList.add("gizli");
+            document.getElementById("sonuc-ekrani").classList.remove("gizli");
+            document.getElementById("cubuk").style.width = "100%";
+
+            // En yüksek puanı alanı bul
+            let enYuksek = Object.keys(skorlar).reduce((a, b) => skorlar[a] > skorlar[b] ? a : b);
+
+            let baslik = "";
+            let aciklama = "";
+            let oneri = "";
+            let hedefLink = "/#urunler"; // Varsayılan hedef (Hiçbir şeye uymazsa buraya gider)
+
+            if (enYuksek === "yagli") {
+                baslik = "YAĞLI CİLT";
+                aciklama = "Cildin fazla sebum üretiyor, bu da parlama ve gözenek sorunlarına yol açıyor.";
+                oneri = "Cildini arındırmak için Temizleme Jelleri senin için en kritik adım.";
+                hedefLink = "/#temizleme-jelleri"; // Yağlı ciltleri Temizleme Jellerine gönder
+
+            } else if (enYuksek === "kuru") {
+                baslik = "KURU CİLT";
+                aciklama = "Cildin nemi tutmakta zorlanıyor, bu yüzden gergin ve pul pul hissediyorsun.";
+                oneri = "Yoğun neme ihtiyacın var. Nemlendiriciler bölümüne mutlaka bakmalısın.";
+                hedefLink = "/#nemlendiriciler"; // Kuru ciltleri Nemlendiricilere gönder
+
+            } else if (enYuksek === "karma") {
+                baslik = "KARMA CİLT";
+                aciklama = "T bölgen yağlıyken yanakların kuru veya normal. Dengeye ihtiyacın var.";
+                oneri = "Dengeleyici Tonikler ile cildinin pH dengesini sağlamalısın.";
+                hedefLink = "/#tonikler"; // Karma ciltleri Toniklere gönder
+
+            } else if (enYuksek === "hassas") {
+                baslik = "HASSAS CİLT";
+                aciklama = "Cildin dış etkenlere karşı çok savunmasız ve çabuk tepki veriyor.";
+                oneri = "Cildini yatıştırmak ve onarmak için özel Serumlarımızı incelemelisin.";
+                hedefLink = "/#serumlar"; // Hassas ciltleri Serumlara gönder
+
+            } else {
+                baslik = "NORMAL CİLT";
+                aciklama = "Şanslısın! Cildinin yağ ve nem dengesi yerinde.";
+                oneri = "Cildini korumak için Güneş Kremlerini ihmal etme.";
+                hedefLink = "/#gunes-kremleri"; // Normal ciltleri Güneş Kremlerine gönder
+            }
+
+            // Metinleri Güncelle
+            document.getElementById("sonuc-baslik").innerText = baslik;
+            document.getElementById("sonuc-aciklama").innerText = aciklama;
+            document.getElementById("sonuc-oneri").innerText = oneri;
+
+            // BUTONUN LİNKİNİ GÜNCELLE
+            document.getElementById("sonuc-linki").href = hedefLink;
+        }
+    </script>
+</body>
+</html>

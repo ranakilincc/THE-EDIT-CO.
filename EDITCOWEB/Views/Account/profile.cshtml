@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="profile-container">
+    <h2>Profilim</h2>
+
+    <p>
+        <strong>E-posta:</strong>
+        @Context.Session.GetString("UserEmail")
+    </p>
+
+    <a href="/Account/Logout" class="btn-logout">
+        Çıkış Yap
+    </a>
+</div>

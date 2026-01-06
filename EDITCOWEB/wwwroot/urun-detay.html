@@ -1,0 +1,463 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Detayı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .geri-don {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .urun-kapsayici {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .urun-gorsel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+            .urun-gorsel img {
+                width: 100%;
+                border-radius: 10px;
+                border: 1px solid #eee;
+                object-fit: cover;
+            }
+
+        .urun-bilgi {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .fiyat {
+            font-size: 1.8rem;
+            color: #e0a6aa;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .aciklama {
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Pembe Buton */
+        .sepete-ekle-btn {
+            background-color: #e0a6aa;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 4px 10px rgba(224, 166, 170, 0.4);
+        }
+
+            .sepete-ekle-btn:hover {
+                background-color: #c9858a;
+                transform: scale(1.05);
+            }
+
+        @media (max-width: 768px) {
+            .urun-kapsayici {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="geri-don">Ana Sayfaya Dön</a>
+
+    <div class="urun-kapsayici">
+
+        <div class="urun-gorsel">
+            <img id="u-resim" src="" alt="Ürün Resmi">
+        </div>
+        <div class="urun-bilgi">
+            <h1 id="u-baslik">Ürün Yükleniyor...</h1>
+            <div id="u-fiyat" class="fiyat"></div>
+            <p id="u-aciklama" class="aciklama"></p>
+            <button onclick="favoriyeEkle()"
+                    onmouseover="this.style.backgroundColor='#c48b90'; this.style.transform='translateY(-3px)';"
+                    onmouseout="this.style.backgroundColor='#e0a6aa'; this.style.transform='translateY(0)';"
+                    class="btn"
+                    style="
+            width: 100%;
+            margin-bottom: 15px;
+            background-color: #e0a6aa; /* Başlangıç Rengi: Pembe */
+            color: white;             /* Yazı Rengi: Beyaz */
+            border: none;             /* Çerçeve yok */
+            padding: 15px 0;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(224, 166, 170, 0.2);">
+
+                <i id="fav-ikon" class="fa-regular fa-heart"></i>
+                <span>Favorilere Ekle</span>
+
+            </button>
+            <button class="sepete-ekle-btn" onclick="sepeteEkle()">Sepete Ekle</button>
+        </div>
+    </div>
+
+    <script>
+        // --- BURASI SENİN ÜRÜN DEPON ---
+        // Buradaki bilgileri kendi ürünlerine göre değiştirebilirsin.
+        // Resim isimlerini (jpg) klasöründekilerle aynı yapmayı unutma!
+        const urunListesi = {
+            // SERUMLAR
+            "serum1": {
+                baslik: "Aydınlatıcı Serum",
+                fiyat: "899 TL",
+                resim: "/images/serumlar/serum1.png",
+                aciklama: "Cildinize ışıltı katar, lekeleri azaltır."
+            },
+            "serum2": {
+                baslik: "Nem Serumu (Hyaluronik Asit)",
+                fiyat: "420 TL",
+                resim: "/images/serumlar/serum2.png",
+                aciklama: "Yoğun nemlendirme sağlar, dolgunlaştırır."
+            },
+            "serum33": {
+                baslik: "C Vitamini Canlandırıcı",
+                fiyat: "480 TL",
+                resim: "/images/serumlar/serum33.png",
+                aciklama: "Yaşlanma karşıtı bakım, ince çizgi görünümünü azaltır."
+            },
+            "serum4": {
+                baslik: "Retinol Gece Bakım Serumu",
+                fiyat: "1.250 TL",
+                resim: "/images/serumlar/serum4.png",
+                aciklama: "Gözenekleri sıkılaştırır ve yağ dengesini sağlar."
+            },
+
+            // GÜNEŞ KREMLERİ
+            "gunes1": {
+                baslik: "50 SPF Yüksek Koruma",
+                fiyat: "550 TL",
+                resim: "/images/güneş kremi/guneskremi1.png",
+                aciklama: "Yüksek koruma, beyaz iz bırakmaz."
+            },
+            "gunes2": {
+                baslik: "Leke Karşıtı Güneş Kremi",
+                fiyat: "600 TL",
+                resim: "/images/güneş kremi/güneskremi2.png",
+                aciklama: "Güneş lekelerine karşı özel formül."
+            },
+            "gunes3": {
+                baslik: "Renkli Güneş Kremi(Tinted)",
+                fiyat: "580 TL",
+                resim: "/images/güneş kremi/guneskremi3.png",
+                aciklama: "Cilt tonunu eşitler ve korur."
+            },
+            "gunes4": {
+                baslik: "Stick Güneş Koruyucu",
+                fiyat: "350 TL",
+                resim: "/images/güneş kremi/güneskremi4.png",
+                aciklama: "Parfümsüz, hassas ciltlere özel."
+            },
+
+            // YÜZ TEMİZLEME JELLERİ
+            "jel11": {
+                baslik: "Arındırıcı Temizleme Jeli",
+                fiyat: "280 TL",
+                resim: "/images/yüz temizleme jeli/yüztemizlemejeli11.png",
+                aciklama: "Yağlı ciltler için derinlemesine temizlik."
+            },
+            "jel22": {
+                baslik: "Köpük Temizleyici",
+                fiyat: "320 TL",
+                resim: "/images/yüz temizleme jeli/yüztemizlemejeli22.png",
+                aciklama: "Kuru ciltleri kurutmadan temizler."
+            },
+            "jel3": {
+                baslik: "Hassas Ciltler İçin Jel",
+                fiyat: "300 TL",
+                resim: "/images/yüz temizleme jeli/yüztemizlemejei3.png",
+                aciklama: "Ölü derilerden arındırır."
+            },
+            "jel4": {
+                baslik: "Yağ Bazlı Temizleyici",
+                fiyat: "350 TL",
+                resim: "/images/yüz temizleme jeli/yüztemizlemejeli4.png",
+                aciklama: "Yumuşak formül, cildi yormaz."
+            },
+
+            // NEMLENDİRİCİLER
+            "nem1": {
+                baslik: "Su Bazlı Nemlendirici",
+                fiyat: "400 TL",
+                resim: "/images/nemlendirici/nemlendirici1.png",
+                aciklama: "Su bazlı, hafif yapılı nemlendirici."
+            },
+            "nem2": {
+                baslik: "Yoğun Bakım Kremi",
+                fiyat: "450 TL",
+                resim: "/images/nemlendirici/nemlendirici2.png",
+                aciklama: "Kuru ve çatlamış ciltler için."
+            },
+            "nem33": {
+                baslik: "Gece Maskesi",
+                fiyat: "480 TL",
+                resim: "/images/nemlendirici/nemlendirici33.png",
+                aciklama: "Parlamayı önler, nem verir."
+            },
+            "nem4": {
+                baslik: "Onarıcı Cica Krem",
+                fiyat: "390 TL",
+                resim: "/images/nemlendirici/nemlendirici4.png",
+                aciklama: "Siz uyurken cildinizi besler."
+            },
+
+            // TONİKLER
+            "tonik1": {
+                baslik: "Gözenek Sıkılaştırıcı Tonik",
+                fiyat: "350 TL",
+                resim: "/images/tonik/tonik1.png",
+                aciklama: "Gözenek görünümünü azaltır."
+            },
+            "tonik2": {
+                baslik: "Aydınlatıcı Vitamin Tonik",
+                fiyat: "380 TL",
+                resim: "/images/tonik/tonik2.png",
+                aciklama: "Cilde parlaklık verir."
+            },
+            "tonik3": {
+                baslik: "Yatıştırıcı Gül Suyu Tonik",
+                fiyat: "290 TL",
+                resim: "/images/tonik/tonik3.png",
+                aciklama: "Kızarıklıkları alır."
+            },
+            "tonik44": {
+                baslik: "Matlaştırıcı Tonik",
+                fiyat: "320 TL",
+                resim: "/images/tonik/tonik44.png",
+                aciklama: "Siyah nokta karşıtı."
+            }
+        };
+
+        // --- SİHİRLİ KISIM (Otomatik Doldurma) ---
+        const urlParametreleri = new URLSearchParams(window.location.search);
+        const urunKodu = urlParametreleri.get('id'); // Linkten kodu al (örn: serum1)
+        const urun = urunListesi[urunKodu]; // Listeden ürünü bul
+
+        if (urun) {
+            // Eğer ürün varsa bilgileri ekrana yaz
+            document.getElementById('u-baslik').innerText = urun.baslik;
+            document.getElementById('u-fiyat').innerText = urun.fiyat;
+            document.getElementById('u-aciklama').innerText = urun.aciklama;
+            document.getElementById('u-resim').src = urun.resim;
+        } else {
+            // Ürün bulunamazsa
+            document.getElementById('u-baslik').innerText = "Ürün Bulunamadı";
+            document.getElementById('u-aciklama').innerText = "Lütfen ana sayfadan bir ürün seçiniz.";
+        }
+
+
+
+        /* --- ÜRÜN DETAY SAYFASI İÇİN EKLEME --- */
+
+        // 2. SAYFA AÇILINCA ÇALIŞACAK KOD
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // URL'den hangi ürün olduğunu bul (Örn: ?kod=serum1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urunKodu = urlParams.get('kod') || 'serum1'; // Eğer linkte yoksa serum1 aç
+
+            const urun = urunListesi[urunKodu];
+
+            if (urun) {
+                // --- EKRANI DOLDURMA KISMI ---
+                document.getElementById('u-baslik').innerText = urun.baslik;
+                document.getElementById('u-fiyat').innerText = urun.fiyat;
+                document.getElementById('u-aciklama').innerText = urun.aciklama;
+
+                // Resmi güncelle (Varsa)
+                var resimKutusu = document.getElementById('u-resim'); // Veya ana-resim
+                if (resimKutusu) resimKutusu.src = urun.resim;
+
+
+                // --- BUTONA GÖREV VERME KISMI (EN ÖNEMLİ YER) ---
+                const buton = document.querySelector(".sepete-ekle-btn");
+
+                // Butona tıklanınca ne yapacağını söylüyoruz:
+                buton.onclick = function () {
+
+                    // 1. Sepeti Hafızadan Çek
+                    var sepet = JSON.parse(localStorage.getItem('sepetim')) || [];
+
+                    // 2. Bu ürünü sepete ekle
+                    sepet.push({
+                        ad: urun.baslik,
+                        resim: urun.resim,
+                        fiyat: urun.fiyat,
+                        adet: 1
+                    });
+
+                    // 3. Yeni listeyi kaydet
+                    localStorage.setItem('sepetim', JSON.stringify(sepet));
+                    localStorage.setItem('sepetSayisi', sepet.length);
+
+                    // 4. Bildirim Ver
+                    bildirimGoster("Ürün başarıyla sepete eklendi!");
+                };
+
+            } else {
+                document.getElementById('u-baslik').innerText = "Ürün Bulunamadı";
+            }
+        });
+    </script>
+    <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
+
+    <style>
+        #toast-kutusu {
+            visibility: hidden; /* Başlangıçta görünmez */
+            min-width: 250px; /* Kutunun genişliği */
+            background-color: #333; /* Koyu gri arka plan (daha şık durur) */
+            color: #000; /* Beyaz yazı */
+            text-align: center; /* Yazıyı ortala */
+            border-radius: 50px; /* Kenarları yuvarlat */
+            padding: 16px; /* İç boşluk */
+            position: fixed; /* Ekrana sabitle */
+            z-index: 1000; /* En üstte dursun */
+            left: 50%; /* Ortala */
+            bottom: 30px; /* Aşağıdan mesafe */
+            transform: translateX(-50%); /* Tam ortalamak için */
+            font-size: 16px; /* Yazı boyutu */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Gölge */
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s; /* Animasyon hızı */
+        }
+
+            /* Gösterildiği zamanki hali */
+            #toast-kutusu.goster {
+                visibility: visible;
+                opacity: 1;
+                bottom: 50px; /* Hafifçe yukarı kayar */
+                background-color: #e0a6aa; /* SENİN RENGİN (Toz Pembe) */
+            }
+    </style>
+
+    <script>
+        function bildirimGoster(mesaj) {
+            var x = document.getElementById("toast-kutusu");
+
+            // Eğer özel bir mesaj geldiyse onu yaz, yoksa varsayılanı kullan
+            if (mesaj) x.innerHTML = '<i class="fa-solid fa-check"></i> ' + mesaj;
+
+            // 'goster' sınıfını ekle (Kutu görünür)
+            x.className = "goster";
+
+            // 3 saniye (3000ms) sonra 'goster' sınıfını kaldır (Kutu kaybolur)
+            setTimeout(function () { x.className = x.className.replace("goster", ""); }, 3000);
+        }
+    </script>
+
+    <script>
+        function favoriyeEkle() {
+
+            // --- 1. BUTON ANİMASYONU (BASILMA EFEKTİ) ---
+            // Sayfadaki favori butonunu bul
+            var buton = document.querySelector("button[onclick='favoriyeEkle()']");
+
+            if (buton) {
+                // Butonu anlık olarak küçült (Basılmış gibi)
+                buton.style.transform = "scale(0.95)";
+
+                // 200 milisaniye sonra eski haline getir
+                setTimeout(function () {
+                    buton.style.transform = "scale(1)";
+                }, 200);
+            }
+
+            // --- 2. ASIL KAYIT İŞLEMİ (Eski kodlarının aynısı) ---
+            var baslik = document.getElementById('u-baslik').innerText;
+            var fiyat = document.getElementById('u-fiyat').innerText;
+
+            var resimEl = document.getElementById('u-resim') || document.querySelector('.urun-gorsel img') || document.getElementById('ana-resim');
+            var resim = resimEl ? resimEl.src : "";
+
+            var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
+            var varMi = favoriler.find(x => x.ad === baslik);
+
+            if (varMi) {
+                alert("Bu ürün zaten favorilerinizde var! ❤️");
+                return;
+            }
+
+            favoriler.push({
+                ad: baslik,
+                resim: resim,
+                fiyat: fiyat
+            });
+
+            localStorage.setItem('favorilerim', JSON.stringify(favoriler));
+
+            var ikon = document.getElementById("fav-ikon");
+            if (ikon) {
+                ikon.className = "fa-solid fa-heart";
+            }
+
+            // Küçük bir gecikmeyle mesaj ver ki animasyon görünsün
+            setTimeout(function () {
+                if (typeof bildirimGoster === "function") {
+                    bildirimGoster("Favorilere eklendi! ❤️");
+                } else {
+                    alert("Ürün favorilere eklendi! ❤️");
+                }
+            }, 100);
+        }
+
+        function favoriyeEkle() {
+            // ... senin yukarıdaki diğer kodların ...
+            // ... alert("Favorilere eklendi") kodların ...
+
+            // EN ALTA BUNU EKLE:
+            favoriSayaciniGuncelle();
+        }
+
+    </script>
+
+</body>
+</html>

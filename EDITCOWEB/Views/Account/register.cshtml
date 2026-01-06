@@ -1,0 +1,26 @@
+﻿@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Üye Ol";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+
+        <h2>Üye Ol</h2>
+
+        <form method="post">
+            <input type="text" name="FirstName" placeholder="Adınız" required />
+            <input type="text" name="LastName" placeholder="Soyadınız" required />
+            <input type="email" name="Email" placeholder="E-posta adresiniz" required />
+            <input type="password" name="Password" placeholder="Şifre oluştur" required />
+
+            <button type="submit">Üye Ol</button>
+        </form>
+
+        <div class="auth-link-row">
+            Zaten hesabın var mı?
+            <a href="/Account/Login">Giriş Yap</a>
+        </div>
+
+    </div>
+</div>

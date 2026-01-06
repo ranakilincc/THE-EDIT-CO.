@@ -1,0 +1,178 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - The Edit Co.</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="nav-left">
+            <a href="/">Anasayfa</a>         
+            <a href="#urunler">Ürünler</a>
+            <a href="#yeni-gelenler">Yeni Gelenler</a>
+            <a href="#kampanyalar">Kampanyalar</a>
+            <a href="/cilt-tipi-testi.html" style="color: #e0a6aa; font-weight: bold; margin-left: 15px; text-decoration: none;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Cilt Tipini Öğren
+            </a>      
+        </div>
+     
+        <div class="nav-logo">
+            The Edit Co.
+        </div>
+
+        <div class="nav-right">
+            <a href="/Favorites/Index" style="text-decoration: none; position: relative; margin-right: 15px;">
+
+                <i class="fa-regular fa-heart" style="font-size: 1.5rem; color: #333;"></i>
+
+                <span id="fav-sayisi-badge" style="
+        position: absolute;
+        top: -10px;        /* Daha yukarı çıktı (Sepetle hizalandı) */
+        right: -8px;       /* Hafif sağa çektik */
+        background-color: #e0a6aa;
+        color: white;
+        font-size: 0.7rem; /* Yazı boyutu küçüldü */
+        font-weight: bold;
+        border-radius: 50%;
+        width: 17px;       /* Genişlik küçüldü (Daha kibar) */
+        height: 17px;      /* Yükseklik küçüldü */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        display: none;     /* JS açacak */
+    ">0</span>
+
+            </a>
+             <a href="/Cart/Index" style="position: relative; display: inline-block; text-decoration: none; color: black; margin-right: 20px;">
+                    <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
+                    <span id="sepet-sayisi" style="
+                     position: absolute;
+                     top: -5px;    /* Yukarı-aşağı ayarı */
+                     right: -8px;  /* Sağ-sol ayarı (Eksi değer sağa iter) */
+                     background-color: #e0a6aa;
+                     color: white;
+                     border-radius: 50%;
+                     font-size: 11px;
+                     font-weight: bold;
+                     padding: 2px 6px;
+                     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                     ">0</span>
+             </a>
+            
+
+            @if (Context.Session.GetString("UserEmail") == null)
+            {
+                <a href="/Account/Login">Giriş Yap / Üye Ol</a>
+            }
+            else
+            {
+                <a href="/Account/Profile">Profilim</a>
+                <a href="/Account/Logout">Çıkış</a>
+            }
+        </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Hafızadaki kayıtlı sayıyı bul
+            var kayitliSayi = localStorage.getItem('sepetSayisi');
+
+            // 2. Sepet yuvarlağını bul
+            var sepetRozeti = document.getElementById("sepet-sayisi");
+
+            // 3. Eğer hafızada sayı varsa ve rozet yerindeyse, sayıyı yaz
+            if (kayitliSayi && sepetRozeti) {
+                sepetRozeti.innerText = kayitliSayi;
+            }
+        });
+    </script>
+
+    <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
+
+    <style>
+        #toast-kutusu {
+            visibility: hidden; /* Başlangıçta görünmez */
+            min-width: 250px; /* Kutunun genişliği */
+            background-color: #333; /* Koyu gri arka plan (daha şık durur) */
+            color: #000; /* Siyah yazı */
+            text-align: center; /* Yazıyı ortala */
+            border-radius: 50px; /* Kenarları yuvarlat */
+            padding: 16px; /* İç boşluk */
+            position: fixed; /* Ekrana sabitle */
+            z-index: 1000; /* En üstte dursun */
+            left: 50%; /* Ortala */
+            bottom: 30px; /* Aşağıdan mesafe */
+            transform: translateX(-50%); /* Tam ortalamak için */
+            font-size: 16px; /* Yazı boyutu */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Gölge */
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s; /* Animasyon hızı */
+        }
+
+            /* Gösterildiği zamanki hali */
+            #toast-kutusu.goster {
+                visibility: visible;
+                opacity: 1;
+                bottom: 50px; /* Hafifçe yukarı kayar */
+                background-color: #e0a6aa; /* SENİN RENGİN (Toz Pembe) */
+            }
+    </style>
+
+    <script>
+        function bildirimGoster(mesaj) {
+            var x = document.getElementById("toast-kutusu");
+
+            // Eğer özel bir mesaj geldiyse onu yaz, yoksa varsayılanı kullan
+            if (mesaj) x.innerHTML = '<i class="fa-solid fa-check"></i> ' + mesaj;
+
+            // 'goster' sınıfını ekle (Kutu görünür)
+            x.className = "goster";
+
+            // 3 saniye (3000ms) sonra 'goster' sınıfını kaldır (Kutu kaybolur)
+            setTimeout(function(){ x.className = x.className.replace("goster", ""); }, 3000);
+        }
+    </script>
+
+    <script>
+        // Bu kod tüm sayfalarda çalışır ve sayacı günceller
+        document.addEventListener("DOMContentLoaded", function() {
+            favoriSayaciniGuncelle();
+        });
+
+        function favoriSayaciniGuncelle() {
+            // Hafızadaki favorileri say
+            var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
+            var sayi = favoriler.length;
+
+            // Rozeti bul ve sayıyı yaz
+            var rozet = document.getElementById("fav-sayisi-badge");
+            if (rozet) {
+                rozet.innerText = sayi;
+                // Sayı varsa göster, yoksa gizle
+                if (sayi > 0) {
+                    rozet.style.display = "flex";
+                } else {
+                    rozet.style.display = "none";
+                }
+            }
+        }
+    </script>
+
+</body> 
+</html>

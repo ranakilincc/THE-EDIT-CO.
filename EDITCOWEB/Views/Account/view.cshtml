@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Üye Ol";
+}
+
+<h2>Üye Ol</h2>
+
+<form method="post">
+    <div>
+        <label>Ad</label><br />
+        <input type="text" name="FirstName" required />
+    </div>
+
+    <div>
+        <label>Soyad</label><br />
+        <input type="text" name="LastName" required />
+    </div>
+
+    <div>
+        <label>Email</label><br />
+        <input type="email" name="Email" required />
+    </div>
+
+    <div>
+        <label>Şifre</label><br />
+        <input type="password" name="Password" required />
+    </div>
+
+    <br />
+    <button type="submit">Kayıt Ol</button>
+</form>
