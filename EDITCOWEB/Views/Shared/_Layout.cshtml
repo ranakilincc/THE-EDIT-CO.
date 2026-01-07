@@ -150,21 +150,27 @@
     </script>
 
     <script>
-        // Bu kod tüm sayfalarda çalışır ve sayacı günceller
+            
+        // Sayfa her açıldığında veya yenilendiğinde çalışır
         document.addEventListener("DOMContentLoaded", function() {
             favoriSayaciniGuncelle();
         });
 
         function favoriSayaciniGuncelle() {
-            // Hafızadaki favorileri say
+            // 1. Hafızadan listeyi çek
             var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
+
+            // 2. Sayıyı bul
             var sayi = favoriler.length;
 
-            // Rozeti bul ve sayıyı yaz
+            // 3. Rozeti (Badge) bul
             var rozet = document.getElementById("fav-sayisi-badge");
+
             if (rozet) {
+                // Sayıyı yaz
                 rozet.innerText = sayi;
-                // Sayı varsa göster, yoksa gizle
+
+                // Eğer 0'dan büyükse göster, yoksa gizle
                 if (sayi > 0) {
                     rozet.style.display = "flex";
                 } else {
@@ -173,6 +179,7 @@
             }
         }
     </script>
+    
 
 </body> 
 </html>

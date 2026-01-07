@@ -395,69 +395,42 @@
     </script>
 
     <script>
-        function favoriyeEkle() {
+    // --- MEVCUT SCRIPTİN İÇİNE EKLE ---
 
-            // --- 1. BUTON ANİMASYONU (BASILMA EFEKTİ) ---
-            // Sayfadaki favori butonunu bul
-            var buton = document.querySelector("button[onclick='favoriyeEkle()']");
+    function favoriyeEkle() {
+    // 1. Şu anki ürünün bilgilerini al (Global değişkenden veya sayfadan)
+    // Not: Sayfa yüklendiğinde 'urun' değişkeni oluşmuştu, onu kullanıyoruz.
+    // Eğer hata verirse sayfadaki ID'lerden çekeriz.
 
-            if (buton) {
-                // Butonu anlık olarak küçült (Basılmış gibi)
-                buton.style.transform = "scale(0.95)";
+    var baslik = document.getElementById('u-baslik').innerText;
+    var resim = document.getElementById('u-resim') ? document.getElementById('u-resim').src : ""; // veya ana-resim
+    var fiyat = document.getElementById('u-fiyat').innerText;
 
-                // 200 milisaniye sonra eski haline getir
-                setTimeout(function () {
-                    buton.style.transform = "scale(1)";
-                }, 200);
-            }
+    // 2. Favori Listesini Hafızadan Çek
+    var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
 
-            // --- 2. ASIL KAYIT İŞLEMİ (Eski kodlarının aynısı) ---
-            var baslik = document.getElementById('u-baslik').innerText;
-            var fiyat = document.getElementById('u-fiyat').innerText;
+    // 3. Kontrol Et: Bu ürün zaten favoride var mı?
+    var varMi = favoriler.find(x => x.ad === baslik);
 
-            var resimEl = document.getElementById('u-resim') || document.querySelector('.urun-gorsel img') || document.getElementById('ana-resim');
-            var resim = resimEl ? resimEl.src : "";
+    if (varMi) {
+    alert("Bu ürün zaten favorilerinizde ekli! ❤️");
+    return; // Fonksiyonu durdur
+    }
 
-            var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
-            var varMi = favoriler.find(x => x.ad === baslik);
+    // 4. Listeye Ekle
+    favoriler.push({
+    ad: baslik,
+    resim: resim,
+    fiyat: fiyat
+    });
 
-            if (varMi) {
-                alert("Bu ürün zaten favorilerinizde var! ❤️");
-                return;
-            }
+    // 5. Kaydet
+    localStorage.setItem('favorilerim', JSON.stringify(favoriler));
 
-            favoriler.push({
-                ad: baslik,
-                resim: resim,
-                fiyat: fiyat
-            });
-
-            localStorage.setItem('favorilerim', JSON.stringify(favoriler));
-
-            var ikon = document.getElementById("fav-ikon");
-            if (ikon) {
-                ikon.className = "fa-solid fa-heart";
-            }
-
-            // Küçük bir gecikmeyle mesaj ver ki animasyon görünsün
-            setTimeout(function () {
-                if (typeof bildirimGoster === "function") {
-                    bildirimGoster("Favorilere eklendi! ❤️");
-                } else {
-                    alert("Ürün favorilere eklendi! ❤️");
-                }
-            }, 100);
-        }
-
-        function favoriyeEkle() {
-            // ... senin yukarıdaki diğer kodların ...
-            // ... alert("Favorilere eklendi") kodların ...
-
-            // EN ALTA BUNU EKLE:
-            favoriSayaciniGuncelle();
-        }
-
+    // 6. İkonu doldur ve Mesaj ver
+    document.getElementById("fav-ikon").className = "fa-solid fa-heart"; // Kalbin içini doldur
+    alert("Ürün favorilere eklendi! ❤️");
+    }
     </script>
-
 </body>
 </html>
