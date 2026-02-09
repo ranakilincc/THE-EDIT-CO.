@@ -428,8 +428,13 @@
     localStorage.setItem('favorilerim', JSON.stringify(favoriler));
 
     // 6. İkonu doldur ve Mesaj ver
-    document.getElementById("fav-ikon").className = "fa-solid fa-heart"; // Kalbin içini doldur
-    alert("Ürün favorilere eklendi! ❤️");
+        setTimeout(function () {
+            if (typeof bildirimGoster === "function") {
+                bildirimGoster("Favorilere eklendi! ❤️");
+            } else {
+                alert("Ürün favorilere eklendi! ❤️");
+            }
+        }, 100);
     }
     </script>
 </body>
