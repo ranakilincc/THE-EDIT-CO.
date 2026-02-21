@@ -1,17 +1,317 @@
-﻿@{
-    Layout = "_Layout";
+﻿@model EDITCOWEB.Models.User
+@{
     ViewData["Title"] = "Profilim";
 }
 
-<div class="profile-container">
-    <h2>Profilim</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
 
-    <p>
-        <strong>E-posta:</strong>
-        @Context.Session.GetString("UserEmail")
-    </p>
 
-    <a href="/Account/Logout" class="btn-logout">
-        Çıkış Yap
-    </a>
+<style>
+    /* PROFİL SAYFASI ÖZEL TASARIMI */
+    body {
+        background-color: #fcfcfc; /* Sayfa arka planı çok hafif gri/beyaz olsun ki kutular öne çıksın */
+    }
+
+    .profil-ana-kapsayici {
+        max-width: 1100px;
+        /* margin: 50px auto; yazan yeri aşağıdaki gibi değiştiriyoruz: */
+        margin: 120px auto 50px auto; /* Üstten 120px boşluk verdik! */
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        padding: 0 20px;
+    }
+    
+    /* SOL MENÜ (Sidebar) */
+    .profil-sol-menu {
+        width: 280px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 30px 20px;
+        flex-shrink: 0;
+    }
+
+    .kullanici-ozet {
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .kullanici-avatar {
+        width: 80px;
+        height: 80px;
+        background-color: #e0a6aa;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        margin: 0 auto 15px auto;
+        box-shadow: 0 4px 10px rgba(224, 166, 170, 0.4);
+    }
+
+    .kullanici-adi {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .kullanici-mail {
+        font-size: 0.85rem;
+        color: #777;
+    }
+
+    .profil-linkleri {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .profil-linkleri li a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 15px;
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s;
+            margin-bottom: 5px;
+        }
+
+            .profil-linkleri li a i {
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            .profil-linkleri li a:hover, .profil-linkleri li a.aktif {
+                background-color: #fdf5f6;
+                color: #e0a6aa;
+            }
+
+    .cikis-btn-menu {
+        color: #d9534f !important;
+        margin-top: 20px;
+    }
+
+        .cikis-btn-menu:hover {
+            background-color: #fdeeee !important;
+        }
+
+
+    /* SAĞ İÇERİK ALANI */
+    .profil-sag-icerik {
+        flex-grow: 1;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 40px;
+    }
+
+    .icerik-baslik {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    /* FORM TASARIMI */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-grup {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .form-grup label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-grup input {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #333;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+            .form-grup input:focus {
+                outline: none;
+                border-color: #e0a6aa;
+                box-shadow: 0 0 0 3px rgba(224, 166, 170, 0.2);
+            }
+
+            /* Sadece okuma amaçlı (değiştirilemez) input stili */
+            .form-grup input[readonly] {
+                background-color: #f9f9f9;
+                color: #888;
+                cursor: not-allowed;
+            }
+
+    .guncelle-btn {
+        background-color: #e0a6aa;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 30px;
+        box-shadow: 0 4px 10px rgba(224, 166, 170, 0.3);
+    }
+
+        .guncelle-btn:hover {
+            background-color: #c48b90;
+            transform: translateY(-2px);
+        }
+
+    /* MOBİL UYUM */
+    @@media (max-width: 768px) {
+        .profil-ana-kapsayici {
+            flex-direction: column;
+        }
+
+        .profil-sol-menu {
+            width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr; /* Mobilde alt alta dilsin */
+        }
+    }
+
+    /* ÖZEL TAKVİM (FLATPICKR) PEMBE TEMA */
+    .flatpickr-calendar {
+        font-family: inherit;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    /* Seçili günün rengini pembe yap */
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus, .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.nextMonthDay {
+        background: #e0a6aa;
+        border-color: #e0a6aa;
+    }
+
+    /* Üzerine gelinen günün rengi */
+    .flatpickr-day:hover {
+        background: #fdf5f6;
+    }
+
+    /* Okların rengi */
+    .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: #e0a6aa;
+    }
+
+</style>
+
+<div class="profil-ana-kapsayici">
+
+    <aside class="profil-sol-menu">
+        <div class="kullanici-ozet">
+            <div class="kullanici-ozet">
+                <div class="kullanici-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <div class="kullanici-adi">@Model.FirstName @Model.LastName</div>
+
+                <div class="kullanici-mail">@Model.Email</div>
+            </div>
+        </div>
+
+        <ul class="profil-linkleri">
+            <li><a href="#" class="aktif"><i class="fa-regular fa-id-card"></i> Kişisel Bilgilerim</a></li>
+
+            <li><a href="/Cart/Index"><i class="fa-solid fa-box-open"></i> Siparişlerim</a></li>
+
+            <li><a href="/Favorites/Index"><i class="fa-regular fa-heart"></i> Favorilerim</a></li>
+
+            <li><a href="#"><i class="fa-solid fa-wand-magic-sparkles"></i> Cilt Rutinim</a></li>
+
+            <li><a href="/Home/Index" class="cikis-btn-menu"><i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap</a></li>
+        </ul>
+    </aside>
+
+    <main class="profil-sag-icerik">
+        <h2 class="icerik-baslik">Kişisel Bilgilerim</h2>
+
+        <form action="#" method="post">
+            
+                <div class="form-grid">
+
+                    <div class="form-grup">
+                        <label>Ad</label>
+                        <input type="text" value="@Model.FirstName">
+                    </div>
+
+                    <div class="form-grup">
+                        <label>Soyad</label>
+                        <input type="text" value="@Model.LastName">
+                    </div>
+
+                    <div class="form-grup">
+                        <label>E-posta Adresi</label>
+                        <input type="email" value="@Model.Email" readonly>
+                    </div>
+
+                    <div class="form-grup">
+                        <label>Cep Telefonu</label>
+                        <input type="tel" id="cepTelefonu" placeholder="05XX XXX XX XX" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    </div>
+          
+                    <div class="form-grup">
+                        <label>Doğum Tarihi</label>
+                        <input type="text" id="dogumTarihiKutusu" placeholder="Gün / Ay / Yıl Seçiniz">
+                    </div>
+
+                <div class="form-grup">
+                    <label>Cilt Tipi (İsteğe Bağlı)</label>
+                    <select style="padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; color: #333; outline: none; font-family: inherit;">
+                        <option value="">Seçiniz...</option>
+                        <option value="kuru">Kuru</option>
+                        <option value="yagli">Yağlı</option>
+                        <option value="karma">Karma</option>
+                        <option value="hassas">Hassas</option>
+                        <option value="normal">Normal</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" class="guncelle-btn" onclick="alert('Bilgileriniz başarıyla güncellendi!')">
+                Bilgileri Güncelle
+            </button>
+        </form>
+    </main>
 </div>
+
+<script>
+    // Takvimi aktif et
+    flatpickr("#dogumTarihiKutusu", {
+        locale: "tr", // Takvimi Türkçe yapar
+        dateFormat: "d.m.Y", // 21.02.2026 formatında gösterir
+        disableMobile: "true" // Mobilde de bizim pembe tasarım görünsün
+    });
+</script>

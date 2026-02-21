@@ -101,9 +101,12 @@ namespace EDITCOWEB.Controllers
 
         // ================= PROFILE =================
 
+        // ================= PROFILE =================
+
         [HttpGet]
         public IActionResult Profile()
         {
+            // 1. Session'dan giriş yapan kullanıcının mailini al
             var email = HttpContext.Session.GetString("UserEmail");
 
             if (email == null)
@@ -111,7 +114,39 @@ namespace EDITCOWEB.Controllers
                 return RedirectToAction("Login");
             }
 
-            return View();
+            User aktifKullanici = null;
+
+            // 2. Senin yöntemle (SqlConnection) veritabanına bağlan
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "SELECT FirstName, LastName, Email FROM Users WHERE Email = @Email";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Email", email);
+
+                con.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    // Eğer veritabanında bu maile sahip kullanıcı bulunursa bilgilerini çek
+                    if (reader.Read())
+                    {
+                        aktifKullanici = new User
+                        {
+                            FirstName = reader["FirstName"].ToString(),
+                            LastName = reader["LastName"].ToString(),
+                            Email = reader["Email"].ToString()
+                        };
+                    }
+                }
+            }
+
+            // 3. Kullanıcı herhangi bir sebepten bulunamazsa (silinmiş vs.) girişe yönlendir
+            if (aktifKullanici == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // 4. Bulunan kullanıcı modelini bizim tasarladığımız HTML sayfasına gönder
+            return View(aktifKullanici);
         }
 
         // ================= LOGOUT =================
