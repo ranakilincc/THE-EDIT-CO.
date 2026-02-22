@@ -98,9 +98,8 @@ namespace EDITCOWEB.Controllers
             ViewBag.Error = "E-posta veya şifre hatalı";
             return View();
         }
-
-        // ================= PROFILE =================
-
+    
+       
         // ================= PROFILE =================
 
         [HttpGet]
@@ -156,5 +155,49 @@ namespace EDITCOWEB.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
+
+
+        // ================= ADMIN GİRİŞİ =================
+
+        [HttpGet]
+        public IActionResult AdminLogin()
+        {
+            // Bu kod, az önce oluşturduğun AdminLogin.cshtml sayfasını ekrana basar.
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult AdminLogin(string email, string password)
+        {
+            // 1. Veritabanına senin ADO.NET yönteminle bağlanıyoruz
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                // 2. Sadece yeni oluşturduğumuz "Admins" tablosuna bakıyoruz
+                string query = "SELECT * FROM Admins WHERE Email = @Email AND Password = @Password";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@Password", password);
+
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                // 3. Eğer eşleşme varsa (Giriş başarılıysa)
+                if (reader.Read())
+                {
+                    // Adminin mailini Session'a kaydediyoruz ki içeride yetkisi olduğunu bilelim
+                    HttpContext.Session.SetString("AdminEmail", reader["Email"].ToString());
+
+                    // Başarılı olursa Admin Paneli Anasayfasına (Dashboard) yönlendirecek
+                    return RedirectToAction("Index", "Admin");
+                }
+            }
+
+            // 4. Şifre veya mail yanlışsa aynı sayfaya hata mesajıyla geri dön
+            ViewBag.Error = "Yönetici E-posta veya Şifresi hatalı!";
+            return View();
+        }
     }
 }
+

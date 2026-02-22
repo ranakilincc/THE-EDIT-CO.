@@ -1,0 +1,131 @@
+﻿@{
+    // Admin girişinde müşterilerin gördüğü menü ve footer olmasın diye Layout'u iptal ediyoruz.
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Edit Co. | Yönetim Paneli</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        body {
+            /* Müşteri tarafındaki o soft pembe tonu koruyoruz ama daha sade */
+            background-color: #fdf5f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .admin-login-kutu {
+            background-color: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(224, 166, 170, 0.2);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .admin-logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #333;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .admin-baslik {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-grup {
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+            .form-grup i {
+                position: absolute;
+                top: 14px;
+                left: 15px;
+                color: #aaa;
+            }
+
+            .form-grup input {
+                width: 100%;
+                padding: 12px 15px 12px 40px; /* Soldan ikon için boşluk bıraktık */
+                border: 1px solid #eee;
+                border-radius: 10px;
+                font-size: 15px;
+                box-sizing: border-box;
+                outline: none;
+                transition: all 0.3s;
+            }
+
+                .form-grup input:focus {
+                    border-color: #e0a6aa;
+                    box-shadow: 0 0 0 3px rgba(224, 166, 170, 0.2);
+                }
+
+        .btn-giris {
+            width: 100%;
+            padding: 14px;
+            background-color: #333; /* Siyah, yönetici ağırlığı katar */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+            .btn-giris:hover {
+                background-color: #e0a6aa; /* Üzerine gelince markanın pembesi olsun */
+                transform: translateY(-2px);
+            }
+
+        .kilit-ikon {
+            font-size: 40px;
+            color: #e0a6aa;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-login-kutu">
+        <i class="fa-solid fa-lock kilit-ikon"></i>
+        <div class="admin-logo">THE EDIT CO.</div>
+        <div class="admin-baslik">Yönetim Paneli</div>
+
+        <form action="/Account/AdminLogin" method="post">
+            <div class="form-grup">
+                <i class="fa-regular fa-envelope"></i>
+                <input type="email" name="email" placeholder="Yönetici E-posta" required>
+            </div>
+
+            <div class="form-grup">
+                <i class="fa-solid fa-key"></i>
+                <input type="password" name="password" placeholder="Şifre" required>
+            </div>
+
+            <button type="submit" class="btn-giris">Giriş Yap</button>
+        </form>
+    </div>
+
+</body>
+</html>

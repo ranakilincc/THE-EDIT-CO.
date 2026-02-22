@@ -543,17 +543,23 @@
 
 		<div id="slider-serit" style="display: flex; width: 100%; transition: transform 1s ease-in-out;">
 
-			<a href="#" style="min-width: 100%; display: block;">
-				<img src="~/images/kampanya/nemlendiricilerkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 1">
-			</a>
-
-			<a href="#" style="min-width: 100%; display: block;">
-				<img src="~/images/kampanya/serumlarkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 2">
-			</a>
-
-			<a href="#" style="min-width: 100%; display: block;">
-				<img src="~/images/kampanya/yuzjelikampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="Kampanya 3">
-			</a>
+			@if (ViewBag.Kampanyalar != null && ViewBag.Kampanyalar.Count > 0)
+			{
+				// Veritabanındaki aktif kampanyaları tek tek dönüp ekrana basıyoruz
+				foreach (var kampanya in ViewBag.Kampanyalar)
+				{
+					<a href="#" style="min-width: 100%; display: block;">
+						<img src="@kampanya.ResimYolu" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="@kampanya.Baslik">
+					</a>
+				}
+			}
+			else
+			{
+				// Eğer admin panelinden henüz hiç kampanya eklenmemişse veya hepsi pasifse, site boş durmasın diye eski resimlerinden birini varsayılan olarak gösteriyoruz
+				<a href="#" style="min-width: 100%; display: block;">
+					<img src="~/images/kampanya/nemlendiricilerkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="The Edit Co. Kampanyaları">
+				</a>
+			}
 
 		</div>
 	</div>
@@ -582,8 +588,8 @@
 			serit.style.transform = "translateX(" + kaydirmaMiktari + "%)";
 		}
 
-		// 3. Zamanlayıcıyı Başlat (5000ms = 5 Saniye)
-		setInterval(slaytDegistir, 5000);
+		// 3. Zamanlayıcıyı Başlat (3000ms = 3 Saniye yaptık, daha akıcı olacak!)
+		setInterval(slaytDegistir, 3000);
 	});
 </script>
 
