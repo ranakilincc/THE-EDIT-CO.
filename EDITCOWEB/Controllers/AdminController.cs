@@ -146,6 +146,135 @@ namespace EDITCOWEB.Controllers
             return RedirectToAction("Campaigns");
         }
 
+
+        // ================= ÜRÜN YÖNETİMİ =================
+        public IActionResult Products()
+        {
+            // 1. GÜVENLİK DUVARI
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            // 2. Ürünleri tutacağımız listeyi hazırlıyoruz
+            List<Product> urunListesi = new List<Product>();
+
+            // 3. Veritabanına bağlanıp ürünleri çekiyoruz
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "SELECT * FROM Products ORDER BY Id DESC"; // En son eklenen en üstte görünsün
+                SqlCommand cmd = new SqlCommand(query, con);
+
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    urunListesi.Add(new Product
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        UrunAdi = reader["UrunAdi"].ToString(),
+                        Kategori = reader["Kategori"].ToString(),
+                        Fiyat = Convert.ToDecimal(reader["Fiyat"]),
+                        Aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "",
+                        ResimYolu = reader["ResimYolu"].ToString(),
+                        StokMiktari = Convert.ToInt32(reader["StokMiktari"]),
+                        EklenmeTarihi = Convert.ToDateTime(reader["EklenmeTarihi"])
+                    });
+                }
+            }
+
+            // 4. Ürünleri tasarıma (View) gönderiyoruz
+            return View(urunListesi);
+        }
+
+
+        // ================= YENİ ÜRÜN EKLEME =================
+
+        // 1. Ürün Ekleme Sayfasını (Tasarımı) Ekrana Getiren Metot
+        [HttpGet]
+        public IActionResult AddProduct()
+        {
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            return View();
+        }
+
+        // 2. Formdan Gelen Ürün Bilgilerini ve Resmi Kaydeden Metot
+        [HttpPost]
+        public IActionResult AddProduct(string urunAdi, string kategori, decimal fiyat, int stokMiktari, string aciklama, IFormFile resimDosyasi)
+        {
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            // Eğer gerçekten bir resim seçildiyse işlemleri yap
+            if (resimDosyasi != null && resimDosyasi.Length > 0)
+            {
+                // A) Sitenin içindeki wwwroot/images klasörüne bu kez "products" (ürünler) diye bir klasör belirliyoruz
+                string klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+
+                if (!Directory.Exists(klasorYolu))
+                {
+                    Directory.CreateDirectory(klasorYolu);
+                }
+
+                // B) Resim ismini benzersiz yapıyoruz
+                string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(resimDosyasi.FileName);
+                string tamYol = Path.Combine(klasorYolu, dosyaAdi);
+
+                // C) Resmi klasöre fiziksel olarak kopyalıyoruz
+                using (var stream = new FileStream(tamYol, FileMode.Create))
+                {
+                    resimDosyasi.CopyTo(stream);
+                }
+
+                string dbResimYolu = "/images/products/" + dosyaAdi;
+
+                // D) Veritabanına (SQL) Kayıt İşlemi
+                using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    string query = "INSERT INTO Products (UrunAdi, Kategori, Fiyat, Aciklama, ResimYolu, StokMiktari) VALUES (@UrunAdi, @Kategori, @Fiyat, @Aciklama, @ResimYolu, @StokMiktari)";
+                    SqlCommand cmd = new SqlCommand(query, con);
+
+                    cmd.Parameters.AddWithValue("@UrunAdi", urunAdi);
+                    cmd.Parameters.AddWithValue("@Kategori", kategori);
+                    cmd.Parameters.AddWithValue("@Fiyat", fiyat);
+                    cmd.Parameters.AddWithValue("@Aciklama", aciklama ?? "");
+                    cmd.Parameters.AddWithValue("@ResimYolu", dbResimYolu);
+                    cmd.Parameters.AddWithValue("@StokMiktari", stokMiktari);
+
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            // İşlem başarıyla bitince bizi tekrar Ürünler listesine göndersin
+            return RedirectToAction("Products");
+        }
+
+        // ================= ÜRÜN SİLME =================
+        public IActionResult DeleteProduct(int id)
+        {
+            // 1. Güvenlik: Admin girişi yapılmış mı kontrol et
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            // 2. SQL'e bağlanıp o ID'ye sahip ürünü siliyoruz
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                // Gelen ID'ye eşit olan ürünü sil komutu
+                string query = "DELETE FROM Products WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                con.Open();
+                cmd.ExecuteNonQuery(); // Silme işlemini çalıştır
+            }
+
+            // 3. İşlem bitince sayfayı yenilemiş gibi tekrar ürünler listesine dön
+            return RedirectToAction("Products");
+        }
+
+
         // ================= LOGOUT =================
         public IActionResult Logout()
         {

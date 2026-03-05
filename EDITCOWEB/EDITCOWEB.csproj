@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <None Include="wwwroot\cilt-tipi-testi.html" />
-    <None Include="wwwroot\urun-detay.html" />
   </ItemGroup>
 
   <ItemGroup>

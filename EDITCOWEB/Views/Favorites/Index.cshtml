@@ -14,6 +14,13 @@
     <h2 style="margin-bottom: 30px; font-weight: 300; text-align: center;">FAVORİ ÜRÜNLERİM ❤️</h2>
 
     <div id="favori-dolu" style="display: none;">
+
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button onclick="favorileriTemizle()" class="btn" style="border: 1px solid #e0a6aa; color: black; background: #e0a6aa; border-radius: 20px; padding: 6px 20px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(224, 166, 170, 0.3);">
+                <i class="fa-solid fa-trash-can" style="margin-right: 5px;"></i> Tümünü Temizle
+            </button>
+        </div>
+
         <table class="table" style="width: 100%; border-collapse: separate; border-spacing: 0 15px;">
             <thead style="display: none;">
                 <tr><th>Ürün</th><th>İşlem</th></tr>
@@ -21,12 +28,6 @@
             <tbody id="favori-listesi">
             </tbody>
         </table>
-
-        <div style="text-align: right; margin-top: 20px;">
-            <button onclick="favorileriTemizle()" class="btn" style="border: 1px solid #e0a6aa; color: #e0a6aa; background: white; border-radius: 20px; padding: 8px 25px;">
-                Tümünü Temizle
-            </button>
-        </div>
     </div>
 
     <div id="favori-bos" style="display: none; width: 100%;">

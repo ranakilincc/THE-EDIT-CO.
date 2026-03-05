@@ -209,271 +209,123 @@
 	<h4 class="kategori-baslik" id="serumlar">SERUMLAR</h4>
 
 	<div class="ozel-urun-grid">
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=serum1">
-					<img src="~/images/serumlar/serum1.png" alt="Serum">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Aydınlatıcı Serum</div>
-				<div class="urun-fiyati">899 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=serum2">
-					<img src="~/images/serumlar/serum2.png" alt="Serum">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Nem Serumu (Hyaluronik Asit)</div>
-				<div class="urun-fiyati">420 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=serum33">
-					<img src="~/images/serumlar/serum33.png" alt="Serum">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">C Vitamini Canlandırıcı</div>
-				<div class="urun-fiyati">480 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=serum4">
-					<img src="~/images/serumlar/serum4.png" alt="Serum">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Retinol Gece Bakım Serumu</div>
-				<div class="urun-fiyati">1.250 TL</div>
-			</div>
-		</div>
-	</div>
+		@if (ViewBag.Serumlar != null)
+		{
+			// Sadece "Serumlar" çantasındaki ürünleri döndürüyoruz!
+			foreach (var urun in ViewBag.Serumlar)
+			{
+				<div class="urun-karti-yeni">
+					<div class="resim-cercevesi">
+						<a href="/Home/ProductDetail?id=@urun.Id">
+							<img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+						</a>
+					</div>
+					<div class="urun-bilgileri">
+						<div class="marka-adi">THE EDIT CO.</div>
+						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
+					</div>
+				</div>
+			}
+		}
+    </div>
+
 
 
 	<h4 class="kategori-baslik" id="tonikler">TONİKLER</h4>
 
 	<div class="ozel-urun-grid">
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=tonik1">
-					<img src="~/images/tonik/tonik1.png" alt="Tonik">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Gözenek Sıkılaştırıcı Tonik</div>
-				<div class="urun-fiyati">350 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=tonik2">
-					<img src="~/images/tonik/tonik2.png" alt="Tonik">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Aydınlatıcı Vitamin Tonik</div>
-				<div class="urun-fiyati">380 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=tonik3">
-					<img src="~/images/tonik/tonik3.png" alt="Tonik">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Yatıştırıcı Gül Suyu Tonik</div>
-				<div class="urun-fiyati">290 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=tonik44">
-					<img src="~/images/tonik/tonik44.png" alt="Tonik">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Matlaştırıcı Tonik</div>
-				<div class="urun-fiyati">320 TL</div>
-			</div>
-		</div>
+		@if (ViewBag.Tonikler != null)
+		{
+			foreach (var urun in ViewBag.Tonikler)
+			{
+				<div class="urun-karti-yeni">
+					<div class="resim-cercevesi">
+						<a href="/Home/ProductDetail?id=@urun.Id">
+							<img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+						</a>
+					</div>
+					<div class="urun-bilgileri">
+						<div class="marka-adi">THE EDIT CO.</div>
+						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
+					</div>
+				</div>
+			}
+		}
+	
 	</div>
+
 
 
 	<h4 class="kategori-baslik" id="gunes-kremleri">GÜNEŞ KREMLERİ</h4>
 
 	<div class="ozel-urun-grid">
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=gunes1">
-					<img src="~/images/güneş kremi/guneskremi1.png" alt="Güneş Kremi">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">50 SPF Yüksek Koruma</div>
-				<div class="urun-fiyati">550 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=gunes2">
-					<img src="~/images/güneş kremi/güneskremi2.png" alt="Güneş Kremi">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Leke Karşıtı Güneş Kremi</div>
-				<div class="urun-fiyati">600 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=gunes3">
-					<img src="~/images/güneş kremi/guneskremi3.png" alt="Güneş Kremi">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Renkli Güneş Kremi (Tinted)</div>
-				<div class="urun-fiyati">580 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=gunes4">
-					<img src="~/images/güneş kremi/güneskremi4.png" alt="Güneş Kremi">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Stick Güneş Koruyucu</div>
-				<div class="urun-fiyati">350 TL</div>
-			</div>
-		</div>
+		@if (ViewBag.GunesKremleri != null)
+		{
+			foreach (var urun in ViewBag.GunesKremleri)
+			{
+				<div class="urun-karti-yeni">
+					<div class="resim-cercevesi">
+						<a href="/Home/ProductDetail?id=@urun.Id">
+							<img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+						</a>
+					</div>
+					<div class="urun-bilgileri">
+						<div class="marka-adi">THE EDIT CO.</div>
+						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
+					</div>
+				</div>
+			}
+     	}
 	</div>
 
 
 	<h4 class="kategori-baslik" id="temizleme-jelleri">YÜZ TEMİZLEME JELİ</h4>
 
 	<div class="ozel-urun-grid">
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=jel11">
-					<img src="~/images/yüz temizleme jeli/yüztemizlemejeli11.png" alt="Jel">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Arındırıcı Temizleme Jeli</div>
-				<div class="urun-fiyati">280 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=jel22">
-					<img src="~/images/yüz temizleme jeli/yüztemizlemejeli22.png" alt="Jel">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Köpük Temizleyici</div>
-				<div class="urun-fiyati">320 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=jel3">
-					<img src="~/images/yüz temizleme jeli/yüztemizlemejei3.png" alt="Jel">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Hassas Ciltler İçin Jel</div>
-				<div class="urun-fiyati">300 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=jel4">
-					<img src="~/images/yüz temizleme jeli/yüztemizlemejeli4.png" alt="Jel">
-					<
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Yağ Bazlı Temizleyici</div>
-				<div class="urun-fiyati">350 TL</div>
-			</div>
-		</div>
+		@if (ViewBag.Temizleyiciler != null)
+		{
+			foreach (var urun in ViewBag.Temizleyiciler)
+			{
+				<div class="urun-karti-yeni">
+					<div class="resim-cercevesi">
+						<a href="/Home/ProductDetail?id=@urun.Id">
+							<img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+						</a>
+					</div>
+					<div class="urun-bilgileri">
+						<div class="marka-adi">THE EDIT CO.</div>
+						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
+					</div>
+				</div>
+			}
+		}
 	</div>
 
 	<h4 class="kategori-baslik" id="nemlendiriciler">NEMLENDİRİCİLER</h4>
 
 	<div class="ozel-urun-grid">
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=nem1">
-					<img src="~/images/nemlendirici/nemlendirici1.png" alt="Nemlendirici">
-					<
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Su Bazlı Nemlendirici</div>
-				<div class="urun-fiyati">400 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=nem2">
-					<img src="~/images/nemlendirici/nemlendirici2.png" alt="Nemlendirici">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Yoğun Bakım Kremi</div>
-				<div class="urun-fiyati">450 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=nem33">
-					<img src="~/images/nemlendirici/nemlendirici33.png" alt="Nemlendirici">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Gece Maskesi</div>
-				<div class="urun-fiyati">480 TL</div>
-			</div>
-		</div>
-		<div class="urun-karti-yeni">
-			<div class="resim-cercevesi">
-				<a href="/urun-detay.html?kod=nem4">
-					<img src="~/images/nemlendirici/nemlendirici4.png" alt="Nemlendirici">
-				</a>
-			</div>
-			<div class="urun-bilgileri">
-				<div class="marka-adi">THE EDIT CO.</div>
-				<div class="urun-ismi">Onarıcı Cica Krem</div>
-				<div class="urun-fiyati">390 TL</div>
-			</div>
-		</div>
+		@if (ViewBag.Nemlendiriciler != null)
+		{
+			foreach (var urun in ViewBag.Nemlendiriciler)
+			{
+				<div class="urun-karti-yeni">
+					<div class="resim-cercevesi">
+						<a href="/Home/ProductDetail?id=@urun.Id">
+							<img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+						</a>
+					</div>
+					<div class="urun-bilgileri">
+						<div class="marka-adi">THE EDIT CO.</div>
+						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
+					</div>
+				</div>
+			}
+		}
 	</div>
 
 
@@ -484,55 +336,31 @@
 	<div class="container">
 		<h2 class="text-center mb-5" id="yeni-gelenler">Yeni Gelenler</h2>
 		<div class="ozel-urun-grid">
-			<div class="urun-karti-yeni">
-				<div class="resim-cercevesi">
-					<a href="/urun-detay.html?kod=nem33">
-						<img src="~/images/nemlendirici/nemlendirici33.png" alt="Nemlendirici">
-						<
-					</a>
-				</div>
-				<div class="urun-bilgileri">
-					<div class="marka-adi">THE EDIT CO.</div>
-					<div class="urun-ismi">Gece Maskesi</div>
-					<div class="urun-fiyati">480 TL</div>
-				</div>
-			</div>
-			<div class="urun-karti-yeni">
-				<div class="resim-cercevesi">
-					<a href="/urun-detay.html?kod=serum2">
-						<img src="~/images/serumlar/serum2.png" alt="Serum">
-					</a>
-				</div>
-				<div class="urun-bilgileri">
-					<div class="marka-adi">THE EDIT CO.</div>
-					<div class="urun-ismi">Nem Serumu (Hyaluronik Asit)</div>
-					<div class="urun-fiyati">420 TL</div>
-				</div>
-			</div>
-			<div class="urun-karti-yeni">
-				<div class="resim-cercevesi">
-					<a href="/urun-detay.html?kod=tonik44">
-						<img src="~/images/tonik/tonik44.png" alt="Tonik">
-					</a>
-				</div>
-				<div class="urun-bilgileri">
-					<div class="marka-adi">THE EDIT CO.</div>
-					<div class="urun-ismi">Matlaştırıcı Tonik</div>
-					<div class="urun-fiyati">320 TL</div>
-				</div>
-			</div>
-			<div class="urun-karti-yeni">
-				<div class="resim-cercevesi">
-					<a href="/urun-detay.html?kod=jel22">
-						<img src="~/images/yüz temizleme jeli/yüztemizlemejeli22.png" alt="Jel">
-					</a>
-				</div>
-				<div class="urun-bilgileri">
-					<div class="marka-adi">THE EDIT CO.</div>
-					<div class="urun-ismi">Köpük Temizleyici</div>
-					<div class="urun-fiyati">320 TL</div>
-				</div>
-			</div>
+
+			@if (ViewBag.YeniGelenler != null)
+			{
+				// Sadece ViewBag.YeniGelenler içinde dönüyoruz
+				foreach (var yeniUrun in ViewBag.YeniGelenler)
+				{
+					<div class="urun-karti-yeni">
+						<div class="resim-cercevesi">
+							<a href="/Home/ProductDetail?id=@yeniUrun.Id">
+								<img src="@yeniUrun.ResimYolu" alt="@yeniUrun.UrunAdi">
+							</a>
+						</div>
+						<div class="urun-bilgileri">
+							<div class="marka-adi">THE EDIT CO.</div>
+							<div class="urun-ismi">@yeniUrun.UrunAdi</div>
+							<div class="urun-fiyati">@yeniUrun.Fiyat.ToString("N0") TL</div>
+						</div>
+					</div>
+				}
+			}
+			else
+			{
+				<p class="text-center">Henüz yeni ürün eklenmedi.</p>
+			}
+
 		</div>
 	</div>
 </section>
