@@ -1,0 +1,50 @@
+﻿@model List<EDITCOWEB.Models.Product>
+@{
+    ViewData["Title"] = "Filtrelenen Ürünler";
+}
+
+<section class="urunler-sayfasi py-5" style="background-color: #fcfbfb; min-height: 60vh;">
+    <div class="container">
+
+        <div class="text-center mb-5 mt-4">
+            <h2 style="font-family: 'Playfair Display', serif; color: #4a3b3b;">Ürünlerimiz</h2>
+            <p style="color: #777;">Filtreleme sonuçlarınız aşağıda listelenmektedir.</p>
+        </div>
+
+        <div class="row g-4">
+
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var urun in Model)
+                {
+                    <div class="col-md-3 col-sm-6">
+
+                        <div class="urun-karti-yeni">
+                            <div class="resim-cercevesi">
+                                <a href="/Home/ProductDetail?id=@urun.Id">
+                                    <img src="@urun.ResimYolu" alt="@urun.UrunAdi" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px;">
+                                </a>
+                            </div>
+                            <div class="urun-bilgileri" style="text-align: left; margin-top: 15px;">
+                                <div class="marka-adi" style="color: #999; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">THE EDIT CO.</div>
+                                <div class="urun-ismi" style="color: #333; font-weight: 500; font-size: 0.95rem; margin: 4px 0;">@urun.UrunAdi</div>
+                                <div class="urun-fiyati" style="color: #333; font-weight: bold;">@urun.Fiyat.ToString("N0") TL</div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: #e0d4d4; margin-bottom: 15px;"></i>
+                    <h4 style="color: #665;">Aradığınız kriterlere uygun ürün bulunamadı.</h4>
+                    <p style="color: #999;">Lütfen filtreleri değiştirerek tekrar deneyin.</p>
+                    <a href="/" class="btn mt-3" style="background-color: #e0a6aa; color: white; padding: 8px 20px; border-radius: 4px; text-decoration: none;">Anasayfaya Dön</a>
+                </div>
+            }
+
+        </div>
+    </div>
+</section>

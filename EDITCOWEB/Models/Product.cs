@@ -10,6 +10,7 @@ namespace EDITCOWEB.Models
         public decimal Fiyat { get; set; }
         public string Aciklama { get; set; }
         public string ResimYolu { get; set; }
+        public string CiltTipi { get; set; }
         public int StokMiktari { get; set; }
         public DateTime EklenmeTarihi { get; set; }
     }

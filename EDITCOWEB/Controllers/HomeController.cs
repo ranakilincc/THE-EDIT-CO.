@@ -83,6 +83,69 @@ namespace EDITCOWEB.Controllers
             return View();
         }
 
+
+        // ================= ÜRÜNLER VE FÝLTRELEME SAYFASI =================
+        public IActionResult Urunler(List<string> ciltTipi, List<string> urunTuru, decimal? minFiyat, decimal? maxFiyat)
+        {
+            List<Product> filtrelenmisUrunler = new List<Product>();
+
+            // 1. Önce veritabanýndaki tüm ürünleri çekiyoruz
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                string queryUrun = "SELECT * FROM Products ORDER BY Id DESC";
+                using (SqlCommand cmdUrun = new SqlCommand(queryUrun, con))
+                {
+                    using (SqlDataReader readerUrun = cmdUrun.ExecuteReader())
+                    {
+                        while (readerUrun.Read())
+                        {
+                            filtrelenmisUrunler.Add(new Product
+                            {
+                                Id = Convert.ToInt32(readerUrun["Id"]),
+                                UrunAdi = readerUrun["UrunAdi"].ToString(),
+                                // Ürün türü veritabanýnda "Kategori" olarak geçiyor
+                                Kategori = readerUrun["Kategori"].ToString(),
+                                // Eski ürünlerde CiltTipi boþ (DBNull) ise hata vermesin diye kontrol ediyoruz
+                                CiltTipi = readerUrun["CiltTipi"] != DBNull.Value ? readerUrun["CiltTipi"].ToString() : "",
+                                Fiyat = Convert.ToDecimal(readerUrun["Fiyat"]),
+                                ResimYolu = readerUrun["ResimYolu"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 2. Cilt Tipine Göre Filtrele
+            if (ciltTipi != null && ciltTipi.Count > 0)
+            {
+                filtrelenmisUrunler = filtrelenmisUrunler.Where(u => ciltTipi.Contains(u.CiltTipi)).ToList();
+            }
+
+            // 3. Ürün Türüne (Kategoriye) Göre Filtrele
+            if (urunTuru != null && urunTuru.Count > 0)
+            {
+                filtrelenmisUrunler = filtrelenmisUrunler.Where(u => urunTuru.Contains(u.Kategori)).ToList();
+            }
+
+            // 4. Minimum Fiyata Göre Filtrele
+            if (minFiyat.HasValue)
+            {
+                filtrelenmisUrunler = filtrelenmisUrunler.Where(u => u.Fiyat >= minFiyat).ToList();
+            }
+
+            // 5. Maksimum Fiyata Göre Filtrele
+            if (maxFiyat.HasValue)
+            {
+                filtrelenmisUrunler = filtrelenmisUrunler.Where(u => u.Fiyat <= maxFiyat).ToList();
+            }
+
+            // Filtrelenmiþ listeyi Urunler.cshtml sayfasýna gönderiyoruz
+            return View(filtrelenmisUrunler);
+        }
+
+
+
         // ================= ÜRÜN DETAY SAYFASI =================
         public IActionResult ProductDetail(int id)
         {

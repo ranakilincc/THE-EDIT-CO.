@@ -10,66 +10,184 @@
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        /* Toast Kutusu CSS */
+        #toast-kutusu {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+        }
+
+            #toast-kutusu.goster {
+                visibility: visible;
+                opacity: 1;
+                bottom: 50px;
+                background-color: #e0a6aa;
+            }
+
+        /* --- YENİ EKLENEN FİLTRE MENÜSÜ CSS --- */
+        .mega-menu-kutu {
+            display: none; /* Başlangıçta gizli - Head içinde olduğu için anında uygulanır */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 500px;
+            background-color: #fffdfd;
+            padding: 25px;
+            z-index: 9999;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 1px solid #f2e6e6;
+            margin-top: 15px;
+        }
+
+            .mega-menu-kutu.goster {
+                display: block;
+            }
+
+        .filtre-baslik {
+            font-family: 'Times New Roman', serif;
+            color: #4a3b3b;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            border-bottom: 1px solid #f2e6e6;
+            padding-bottom: 5px;
+        }
+
+        .custom-checkbox {
+            margin-bottom: 6px;
+        }
+
+            .custom-checkbox input {
+                accent-color: #e0a6aa;
+                cursor: pointer;
+                margin-right: 5px;
+            }
+
+            .custom-checkbox label {
+                font-size: 0.9rem;
+                color: #555;
+                cursor: pointer;
+                font-family: 'Inter', sans-serif;
+            }
+
+        .fiyat-input {
+            width: 80px;
+            text-align: center;
+            border: 1px solid #e0d4d4;
+            border-radius: 4px;
+            padding: 5px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+            .fiyat-input:focus {
+                border-color: #e0a6aa;
+            }
+
+        .btn-sonuclarigoster {
+            background-color: #e0a6aa;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            padding: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+            .btn-sonuclarigoster:hover {
+                background-color: #d4989c;
+            }
+    </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
     <header class="navbar">
-        <div class="nav-left">
-            <a href="/">Anasayfa</a>         
-            <a href="#urunler">Ürünler</a>
+        <div class="nav-left" style="display: flex; align-items: center;">
+            <a href="/">Anasayfa</a>
+
+            <div id="urunlerDropdownKapsayici" style="position: relative; display: inline-block;">
+                <a href="#" id="urunlerMenuButonu" style="cursor: pointer;">
+                    Ürünler <i class="fas fa-chevron-down" style="font-size: 0.6em; margin-left: 3px; vertical-align: middle;"></i>
+                </a>
+
+                <div id="filtreMegaMenu" class="mega-menu-kutu">
+                    <form action="/Home/Urunler" method="GET">
+                        <div style="display: flex; justify-content: space-between;">
+
+                            <div style="margin-right: 30px;">
+                                <h6 class="filtre-baslik">Cilt Tipi</h6>
+                                <div class="custom-checkbox"><input type="checkbox" name="ciltTipi" value="Kuru" id="kuru"><label for="kuru">Kuru</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="ciltTipi" value="Yağlı" id="yagli"><label for="yagli">Yağlı</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="ciltTipi" value="Hassas" id="hassas"><label for="hassas">Hassas</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="ciltTipi" value="Normal" id="normal"><label for="normal">Normal</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="ciltTipi" value="Karma" id="karma"><label for="karma">Karma</label></div>
+                            </div>
+
+                            <div style="margin-right: 30px;">
+                                <h6 class="filtre-baslik">Ürün Türü</h6>
+                                <div class="custom-checkbox"><input type="checkbox" name="urunTuru" value="Temizleyici" id="temizleyici"><label for="temizleyici">Temizleyici</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="urunTuru" value="Tonik" id="tonik"><label for="tonik">Tonik</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="urunTuru" value="Serum" id="serum"><label for="serum">Serum</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="urunTuru" value="Nemlendirici" id="nemlendirici"><label for="nemlendirici">Nemlendirici</label></div>
+                                <div class="custom-checkbox"><input type="checkbox" name="urunTuru" value="Güneş Kremi" id="guneskremi"><label for="guneskremi">Güneş Kremi</label></div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <h6 class="filtre-baslik">Fiyat Aralığı</h6>
+                                    <div style="display: flex; align-items: center;">
+                                        <input type="number" class="fiyat-input" name="minFiyat" placeholder="₺0">
+                                        <span style="margin: 0 8px; color: #777;">-</span>
+                                        <input type="number" class="fiyat-input" name="maxFiyat" placeholder="₺1000">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-sonuclarigoster mt-3">Sonuçları Göster</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <a href="#yeni-gelenler">Yeni Gelenler</a>
             <a href="#kampanyalar">Kampanyalar</a>
             <a href="/cilt-tipi-testi.html" style="color: #e0a6aa; font-weight: bold; margin-left: 15px; text-decoration: none;">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Cilt Tipini Öğren
-            </a>      
+            </a>
         </div>
-     
+
         <div class="nav-logo">
             The Edit Co.
         </div>
 
         <div class="nav-right">
             <a href="/Favorites/Index" style="text-decoration: none; position: relative; margin-right: 15px;">
-
                 <i class="fa-regular fa-heart" style="font-size: 1.5rem; color: #333;"></i>
-
-                <span id="fav-sayisi-badge" style="
-        position: absolute;
-        top: -10px;        /* Daha yukarı çıktı (Sepetle hizalandı) */
-        right: -8px;       /* Hafif sağa çektik */
-        background-color: #e0a6aa;
-        color: white;
-        font-size: 0.7rem; /* Yazı boyutu küçüldü */
-        font-weight: bold;
-        border-radius: 50%;
-        width: 17px;       /* Genişlik küçüldü (Daha kibar) */
-        height: 17px;      /* Yükseklik küçüldü */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        display: none;     /* JS açacak */
-    ">0</span>
-
+                <span id="fav-sayisi-badge" style="position: absolute; top: -10px; right: -8px; background-color: #e0a6aa; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 50%; width: 17px; height: 17px; display: flex; align-items: center; justify-content: center; display: none;">0</span>
             </a>
-             <a href="/Cart/Index" style="position: relative; display: inline-block; text-decoration: none; color: black; margin-right: 20px;">
-                    <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
-                    <span id="sepet-sayisi" style="
-                     position: absolute;
-                     top: -5px;    /* Yukarı-aşağı ayarı */
-                     right: -8px;  /* Sağ-sol ayarı (Eksi değer sağa iter) */
-                     background-color: #e0a6aa;
-                     color: white;
-                     border-radius: 50%;
-                     font-size: 11px;
-                     font-weight: bold;
-                     padding: 2px 6px;
-                     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                     ">0</span>
-             </a>
-            
+            <a href="/Cart/Index" style="position: relative; display: inline-block; text-decoration: none; color: black; margin-right: 20px;">
+                <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
+                <span id="sepet-sayisi" style="position: absolute; top: -5px; right: -8px; background-color: #e0a6aa; color: white; border-radius: 50%; font-size: 11px; font-weight: bold; padding: 2px 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">0</span>
+            </a>
 
             @if (Context.Session.GetString("UserEmail") == null)
             {
@@ -83,94 +201,42 @@
         </div>
     </header>
 
-    <!-- PAGE CONTENT -->
     <main>
         @RenderBody()
     </main>
 
+    <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
+
     <script>
+        // Sepet Sayısı Güncelleme
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Hafızadaki kayıtlı sayıyı bul
             var kayitliSayi = localStorage.getItem('sepetSayisi');
-
-            // 2. Sepet yuvarlağını bul
             var sepetRozeti = document.getElementById("sepet-sayisi");
-
-            // 3. Eğer hafızada sayı varsa ve rozet yerindeyse, sayıyı yaz
             if (kayitliSayi && sepetRozeti) {
                 sepetRozeti.innerText = kayitliSayi;
             }
         });
-    </script>
 
-    <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
-
-    <style>
-        #toast-kutusu {
-            visibility: hidden; /* Başlangıçta görünmez */
-            min-width: 250px; /* Kutunun genişliği */
-            background-color: #333; /* Koyu gri arka plan (daha şık durur) */
-            color: #000; /* Siyah yazı */
-            text-align: center; /* Yazıyı ortala */
-            border-radius: 50px; /* Kenarları yuvarlat */
-            padding: 16px; /* İç boşluk */
-            position: fixed; /* Ekrana sabitle */
-            z-index: 1000; /* En üstte dursun */
-            left: 50%; /* Ortala */
-            bottom: 30px; /* Aşağıdan mesafe */
-            transform: translateX(-50%); /* Tam ortalamak için */
-            font-size: 16px; /* Yazı boyutu */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Gölge */
-            opacity: 0;
-            transition: opacity 0.5s, bottom 0.5s; /* Animasyon hızı */
-        }
-
-            /* Gösterildiği zamanki hali */
-            #toast-kutusu.goster {
-                visibility: visible;
-                opacity: 1;
-                bottom: 50px; /* Hafifçe yukarı kayar */
-                background-color: #e0a6aa; /* SENİN RENGİN (Toz Pembe) */
-            }
-    </style>
-
-    <script>
+        // Toast Bildirim
         function bildirimGoster(mesaj) {
             var x = document.getElementById("toast-kutusu");
-
-            // Eğer özel bir mesaj geldiyse onu yaz, yoksa varsayılanı kullan
             if (mesaj) x.innerHTML = '<i class="fa-solid fa-check"></i> ' + mesaj;
-
-            // 'goster' sınıfını ekle (Kutu görünür)
             x.className = "goster";
-
-            // 3 saniye (3000ms) sonra 'goster' sınıfını kaldır (Kutu kaybolur)
             setTimeout(function(){ x.className = x.className.replace("goster", ""); }, 3000);
         }
-    </script>
 
-    <script>
-            
-        // Sayfa her açıldığında veya yenilendiğinde çalışır
+        // Favori Sayısı Güncelleme
         document.addEventListener("DOMContentLoaded", function() {
             favoriSayaciniGuncelle();
         });
 
         function favoriSayaciniGuncelle() {
-            // 1. Hafızadan listeyi çek
             var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
-
-            // 2. Sayıyı bul
             var sayi = favoriler.length;
-
-            // 3. Rozeti (Badge) bul
             var rozet = document.getElementById("fav-sayisi-badge");
 
             if (rozet) {
-                // Sayıyı yaz
                 rozet.innerText = sayi;
-
-                // Eğer 0'dan büyükse göster, yoksa gizle
                 if (sayi > 0) {
                     rozet.style.display = "flex";
                 } else {
@@ -178,8 +244,33 @@
                 }
             }
         }
-    </script>
-    
 
-</body> 
+        // AÇILIR MENÜ (MEGA MENU) MANTIĞI
+        document.addEventListener('DOMContentLoaded', function() {
+            const urunlerButonu = document.getElementById('urunlerMenuButonu');
+            const filtreMenusu = document.getElementById('filtreMegaMenu');
+
+            // "Ürünler" yazısına tıklandığında menüyü aç/kapat
+            urunlerButonu.addEventListener('click', function(e) {
+                e.preventDefault(); // Sayfanın en üste atlamasını engeller
+                filtreMenusu.classList.toggle('goster');
+            });
+
+            // Sayfada menü harici boş bir yere tıklandığında menüyü kapat
+            document.addEventListener('click', function(e) {
+                const kapsayici = document.getElementById('urunlerDropdownKapsayici');
+                // Eğer tıklanan yer kapsayıcının (buton veya açılan menü) içinde değilse gizle
+                if (!kapsayici.contains(e.target)) {
+                    filtreMenusu.classList.remove('goster');
+                }
+            });
+
+            // Tıklanan checkbox kapanmasın diye menu içine tıklamayı durdur
+            filtreMenusu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
+
+</body>
 </html>
