@@ -24,7 +24,7 @@ namespace EDITCOWEB.Controllers
             List<Campaign> aktifKampanyalar = new List<Campaign>();
             List<Product> butunUrunler = new List<Product>(); // Bütün ürünleri tutacaðýmýz ana liste
 
-             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
 
             {
                 con.Open();

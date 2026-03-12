@@ -1,0 +1,96 @@
+﻿@{
+    ViewData["Title"] = "Fotoğraf ile Cilt Analizi";
+}
+
+<style>
+    body {
+        background-color: #fce4ec;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .upload-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+    }
+
+    .upload-card {
+        background-color: white;
+        width: 90%;
+        max-width: 650px;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .upload-card h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .upload-card p {
+        color: #666;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .upload-card input[type="file"] {
+        margin: 20px 0;
+        font-size: 1rem;
+    }
+
+    .upload-btn {
+        background-color: #e0a6aa;
+        color: white;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .upload-btn:hover {
+        background-color: #d18f95;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        text-decoration: none;
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    .error-box {
+        color: #b00020;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="upload-wrapper">
+    <div class="upload-card">
+        <a href="/cilt-tipi-testi.html" class="back-link">Cilt Tipi Sayfasına Dön</a>
+
+        <h2>Fotoğraf ile Cilt Analizi</h2>
+        <p>
+            Cildinizin daha doğru analiz edilebilmesi için net, makyajsız ve iyi ışıkta çekilmiş
+            bir yüz fotoğrafı yükleyin.
+        </p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error-box">@ViewBag.Error</div>
+        }
+
+        <form asp-controller="SkinAnalysis" asp-action="Upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="photo" accept="image/*" required />
+            <br />
+            <button type="submit" class="upload-btn">Analiz Et</button>
+        </form>
+    </div>
+</div>

@@ -121,6 +121,31 @@
             color: #888;
             font-size: 0.9rem;
         }
+        .buton-grubu {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-test {
+            background-color: #e0a6aa;
+        }
+
+        .btn-fotograf {
+            background-color: white;
+            color: #e0a6aa;
+            border: 2px solid #e0a6aa;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+            .btn-fotograf:hover {
+                background-color: #e0a6aa;
+                color: white;
+            }
     </style>
 </head>
 <body>
@@ -132,7 +157,10 @@
             <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 50px; color: #e0a6aa; margin-bottom: 20px;"></i>
             <h2>Cilt Tipini Keşfet</h2>
             <p>Sadece 7 soruda cildinin neye ihtiyacı olduğunu öğrenmeye hazır mısın? Doğru ürünleri seçmek için önce cildini tanıman gerekir.</p>
-            <button class="tekrar-btn" onclick="testiBaslat()" style="background-color: #e0a6aa;">Teste Başla</button>
+            <div class="buton-grubu">
+                <button class="tekrar-btn btn-test" onclick="testiBaslat()">Teste Başla</button>
+                <a href="/SkinAnalysis/Upload" class="tekrar-btn btn-fotograf">Fotoğraf Yükle</a>
+            </div>
         </div>
 
         <div id="soru-ekrani" class="gizli">
