@@ -3,48 +3,118 @@
     ViewData["Title"] = "Filtrelenen Ürünler";
 }
 
-<section class="urunler-sayfasi py-5" style="background-color: #fcfbfb; min-height: 60vh;">
-    <div class="container">
+<style>
+    .urun-sayfasi-kapsayici {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 130px 20px 40px; /* SİHİRLİ DOKUNUŞ: Üstten 130px boşluk bıraktık ki menünün altına girmesin */
+    }
 
-        <div class="text-center mb-5 mt-4">
-            <h2 style="font-family: 'Playfair Display', serif; color: #4a3b3b;">Ürünlerimiz</h2>
-            <p style="color: #777;">Filtreleme sonuçlarınız aşağıda listelenmektedir.</p>
-        </div>
+    .baslik-alani {
+        text-align: center;
+        margin-bottom: 50px;
+    }
 
-        <div class="row g-4">
+        .baslik-alani h2 {
+            font-family: 'Playfair Display', serif;
+            color: #4a3b3b;
+            font-size: 2.5rem;
+        }
 
-            @if (Model != null && Model.Count > 0)
+    /* İŞTE KESİN ÇÖZÜM: EKRANI ZORLA 4'E BÖLEN KOD */
+    .kusursuz-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 Eşit Sütun */
+        gap: 30px; /* Ürünler arası boşluk */
+    }
+
+    .tekil-urun-karti {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        text-align: center;
+        transition: transform 0.3s;
+    }
+
+        .tekil-urun-karti:hover {
+            transform: translateY(-5px);
+        }
+
+        /* RESMİ KUTUNUN İÇİNE HAPSEDEN KOD */
+        .tekil-urun-karti img {
+            width: 100% !important;
+            height: 250px !important; /* Yüksekliği sabitler */
+            object-fit: contain !important; /* Kesilmesini engeller */
+            margin-bottom: 20px;
+        }
+
+    .u-marka {
+        color: #999;
+        font-size: 0.75rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .u-isim {
+        color: #333;
+        font-weight: 500;
+        font-size: 1.05rem;
+        margin: 10px 0;
+        text-decoration: none;
+        display: block;
+        height: 45px; /* İsimler uzun/kısa olsa da hizayı bozmaz */
+    }
+
+    .u-fiyat {
+        color: #e0a6aa;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* Tablet ve Telefon Uyumluluğu */
+    @@media (max-width: 992px) {
+        .kusursuz-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .kusursuz-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="urun-sayfasi-kapsayici">
+    <div class="baslik-alani">
+        <h2>Ürünlerimiz</h2>
+        <p style="color: #777;">Filtreleme sonuçlarınız aşağıda listelenmektedir.</p>
+    </div>
+
+    <div class="kusursuz-grid">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var urun in Model)
             {
-                foreach (var urun in Model)
-                {
-                    <div class="col-md-3 col-sm-6">
-
-                        <div class="urun-karti-yeni">
-                            <div class="resim-cercevesi">
-                                <a href="/Home/ProductDetail?id=@urun.Id">
-                                    <img src="@urun.ResimYolu" alt="@urun.UrunAdi" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px;">
-                                </a>
-                            </div>
-                            <div class="urun-bilgileri" style="text-align: left; margin-top: 15px;">
-                                <div class="marka-adi" style="color: #999; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">THE EDIT CO.</div>
-                                <div class="urun-ismi" style="color: #333; font-weight: 500; font-size: 0.95rem; margin: 4px 0;">@urun.UrunAdi</div>
-                                <div class="urun-fiyati" style="color: #333; font-weight: bold;">@urun.Fiyat.ToString("N0") TL</div>
-                            </div>
-                        </div>
-
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="col-12 text-center py-5">
-                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: #e0d4d4; margin-bottom: 15px;"></i>
-                    <h4 style="color: #665;">Aradığınız kriterlere uygun ürün bulunamadı.</h4>
-                    <p style="color: #999;">Lütfen filtreleri değiştirerek tekrar deneyin.</p>
-                    <a href="/" class="btn mt-3" style="background-color: #e0a6aa; color: white; padding: 8px 20px; border-radius: 4px; text-decoration: none;">Anasayfaya Dön</a>
+                <div class="tekil-urun-karti">
+                    <a href="/Home/ProductDetail?id=@urun.Id" style="text-decoration: none;">
+                        <img src="@urun.ResimYolu" alt="@urun.UrunAdi">
+                        <div class="u-marka">THE EDIT CO.</div>
+                        <div class="u-isim">@urun.UrunAdi</div>
+                        <div class="u-fiyat">@urun.Fiyat.ToString("N0") TL</div>
+                    </a>
                 </div>
             }
-
-        </div>
+        }
+        else
+        {
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                <i class="fa-solid fa-box-open" style="font-size: 3rem; color: #e0d4d4; margin-bottom: 15px;"></i>
+                <h4 style="color: #665;">Aradığınız kriterlere uygun ürün bulunamadı.</h4>
+                <a href="/" class="btn mt-3" style="background-color: #e0a6aa; color: white; padding: 8px 20px; border-radius: 4px; text-decoration: none; display: inline-block;">Anasayfaya Dön</a>
+            </div>
+        }
     </div>
-</section>
+</div>
