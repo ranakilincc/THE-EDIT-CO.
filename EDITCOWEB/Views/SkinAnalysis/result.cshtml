@@ -1,0 +1,78 @@
+﻿@model EDITCOWEB.Models.SkinAnalysisResult
+
+@{
+    ViewData["Title"] = "Cilt Analizi Sonucu";
+}
+
+<style>
+    body {
+        background-color: #fce4ec;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .result-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    .result-card {
+        background-color: white;
+        width: 100%;
+        max-width: 850px;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+        .result-card h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+    .result-box {
+        background: #fff0f1;
+        padding: 18px 20px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+    }
+
+    .label {
+        font-weight: bold;
+        color: #d18692;
+    }
+
+    .result-btn {
+        display: inline-block;
+        margin-top: 20px;
+        background-color: #e0a6aa;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+    }
+
+        .result-btn:hover {
+            background-color: #d18f95;
+        }
+</style>
+
+<div class="result-wrapper">
+    <div class="result-card">
+        <h2>Fotoğraf ile Cilt Analizi Sonucu</h2>
+
+        <div class="result-box"><span class="label">Cilt Tipi:</span> @Model.SkinType</div>
+        <div class="result-box"><span class="label">Genel Değerlendirme:</span> @Model.Summary</div>
+        <div class="result-box"><span class="label">Önerilen Rutin:</span> @Model.Routine</div>
+        <div class="result-box"><span class="label">Önerilen Ürün:</span> @Model.RecommendedProduct</div>
+        <div class="result-box"><span class="label">Önerilen Kategori:</span> @Model.RecommendedCategory</div>
+        <div class="result-box"><span class="label">Parlaklık Durumu:</span> @Model.Brightness</div>
+        <div class="result-box"><span class="label">Kızarıklık Düzeyi:</span> @Model.Redness</div>
+        <div class="result-box"><span class="label">Doku Analizi:</span> @Model.Texture</div>
+
+        <a href="/#urunler" class="result-btn">Ürünleri İncele</a>
+    </div>
+</div>
