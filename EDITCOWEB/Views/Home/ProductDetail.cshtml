@@ -1,4 +1,5 @@
 ﻿@model EDITCOWEB.Models.Product
+@using Microsoft.AspNetCore.Http
 @{
     Layout = null;
 }
@@ -153,6 +154,97 @@
         </div>
     </div>
 
+    <div class="yorumlar-kapsayici" style="max-width: 1000px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+
+        <h2 style="font-family: 'Playfair Display', serif; color: #222; margin-bottom: 5px; border-bottom: 2px solid #f2e6e6; padding-bottom: 10px;">
+            Ürün Değerlendirmeleri
+        </h2>
+
+        <div class="yorum-formu" style="margin-bottom: 40px; background: #fcfbfb; padding: 25px; border-radius: 8px; border: 1px solid #f0eaea;">
+
+            @if (Context.Session.GetString("UserEmail") != null)
+            {
+                <h4 style="margin-bottom: 20px; color: #4a3b3b; font-size: 1.2rem;">Siz de Değerlendirin</h4>
+
+                <form action="/Home/YorumEkle" method="post">
+                    <input type="hidden" name="ProductId" value="@Model.Id" />
+                    <input type="hidden" name="Puan" id="secilen-puan" value="0" required />
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #777; font-size: 0.9rem;">Puanınız *</label>
+                        <div class="yildiz-secici" style="font-size: 1.8rem; color: #ddd; cursor: pointer;">
+                            <i class="fa-solid fa-star" data-deger="1"></i>
+                            <i class="fa-solid fa-star" data-deger="2"></i>
+                            <i class="fa-solid fa-star" data-deger="3"></i>
+                            <i class="fa-solid fa-star" data-deger="4"></i>
+                            <i class="fa-solid fa-star" data-deger="5"></i>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: #777; font-size: 0.9rem;">Yorumunuz</label>
+                        <textarea name="YorumMetni" rows="4" placeholder="Bu ürün hakkında ne düşünüyorsunuz?" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" id="yorum-gonder-btn" style="background-color: #e0a6aa; color: white; padding: 12px 30px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                        Yorumu Gönder
+                    </button>
+                    <p id="yildiz-hata" style="color: red; font-size: 0.9rem; display: none; margin-top: 10px;">Lütfen puan vermek için yıldızlara tıklayın.</p>
+                </form>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fa-solid fa-lock" style="font-size: 2rem; color: #e0a6aa; margin-bottom: 15px;"></i>
+                    <h4 style="color: #4a3b3b; margin-bottom: 10px;">Yorum Yapabilmek İçin Giriş Yapmalısınız</h4>
+                    <p style="color: #777; margin-bottom: 20px;">Bu ürün hakkında düşüncelerinizi paylaşmak için lütfen hesabınıza giriş yapın.</p>
+                    <a href="/Account/Login" style="background-color: #4a3b3b; color: white; padding: 10px 25px; border-radius: 30px; text-decoration: none; font-weight: bold;">Giriş Yap / Üye Ol</a>
+                </div>
+            }
+        </div>
+
+        <div class="yorum-listesi">
+            @if (ViewBag.Yorumlar != null && ((List<EDITCOWEB.Models.Review>)ViewBag.Yorumlar).Count > 0)
+            {
+                foreach (var yorum in (List<EDITCOWEB.Models.Review>)ViewBag.Yorumlar)
+                {
+                    <div class="tekil-yorum" style="border-bottom: 1px solid #f0f0f0; padding: 20px 0;">
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="color: #333; font-size: 1.1rem;">@yorum.KullaniciAdi</strong>
+                            <span style="color: #aaa; font-size: 0.85rem;">@yorum.Tarih.ToString("dd.MM.yyyy")</span>
+                        </div>
+
+                        <div style="color: #e0a6aa; margin-bottom: 12px; font-size: 0.9rem;">
+                            @for (int i = 0; i < yorum.Puan; i++)
+                            {
+                                <span>★</span>
+                            }
+                            @for (int i = yorum.Puan; i < 5; i++)
+                            {
+                                <span style="color: #e0e0e0;">★</span>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(yorum.YorumMetni))
+                        {
+                            <p style="color: #555; line-height: 1.6; margin: 0;">@yorum.YorumMetni</p>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="text-align: center; padding: 30px 0;">
+                    <i class="fa-regular fa-comment-dots" style="font-size: 2.5rem; color: #ddd; margin-bottom: 10px;"></i>
+                    <p style="color: #888; font-style: italic; margin: 0;">Bu ürün için henüz değerlendirme yapılmamış. İlk yorumu siz yazın!</p>
+                </div>
+            }
+        </div>
+
+    </div>
+   
+
     <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
 
     <script>
@@ -198,6 +290,65 @@
             localStorage.setItem('favorilerim', JSON.stringify(favoriler));
             setTimeout(function () { bildirimGoster("Favorilere eklendi! ❤️"); }, 100);
         }
+
+        // ================= İNTERAKTİF YILDIZ SEÇİMİ (HOVER VE TIKLAMA) =================
+        const yildizlar = document.querySelectorAll('.yildiz-secici i');
+        const puanGizliInput = document.getElementById('secilen-puan');
+        const formBtn = document.getElementById('yorum-gonder-btn');
+        const hataMesaji = document.getElementById('yildiz-hata');
+
+        if (yildizlar.length > 0) {
+            yildizlar.forEach(yildiz => {
+                // Farenin üstüne geldiğinde yıldızları boya
+                yildiz.addEventListener('mouseover', function () {
+                    let hoverDegeri = this.getAttribute('data-deger');
+                    yildizlariBoya(hoverDegeri);
+                });
+
+                // Fareyi çektiğinde seçili olan puana geri dön
+                yildiz.addEventListener('mouseout', function () {
+                    let seciliDeger = puanGizliInput.value;
+                    yildizlariBoya(seciliDeger);
+                });
+
+                // Tıklandığında puanı kaydet
+                yildiz.addEventListener('click', function () {
+                    puanGizliInput.value = this.getAttribute('data-deger');
+                    yildizlariBoya(this.getAttribute('data-deger'));
+                    hataMesaji.style.display = 'none'; // Seçim yapıldıysa hatayı gizle
+                });
+            });
+
+            function yildizlariBoya(deger) {
+                yildizlar.forEach(y => {
+                    if (y.getAttribute('data-deger') <= deger) {
+                        y.style.color = '#f39c12'; // Sarı renk
+                    } else {
+                        y.style.color = '#ddd'; // Gri renk
+                    }
+                });
+            }
+
+            // Yıldız seçilmeden formun gönderilmesini engelleme
+            formBtn.addEventListener('click', function (e) {
+                if (puanGizliInput.value == "0") {
+                    e.preventDefault(); // Formun gitmesini durdur
+                    hataMesaji.style.display = 'block';
+                }
+            });
+        }
+
+        // ================= BAŞARILI YORUM BİLDİRİMİ =================
+        @if (TempData["YorumBasarili"] != null)
+        {
+                <text>
+                // Sayfa yüklendikten yarım saniye sonra o şık toast kutunu tetikliyoruz
+                setTimeout(function() {
+                    bildirimGoster('@TempData["YorumBasarili"]');
+                }, 500);
+                </text>
+        }
+
     </script>
 </body>
 </html>

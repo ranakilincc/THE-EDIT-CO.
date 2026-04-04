@@ -13,5 +13,7 @@ namespace EDITCOWEB.Models
         public string CiltTipi { get; set; }
         public int StokMiktari { get; set; }
         public DateTime EklenmeTarihi { get; set; }
+        public double OrtalamaPuan { get; set; }
+        public int YorumSayisi { get; set; }
     }
 }

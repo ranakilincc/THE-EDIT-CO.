@@ -281,5 +281,79 @@ namespace EDITCOWEB.Controllers
             HttpContext.Session.Remove("AdminEmail");
             return RedirectToAction("AdminLogin", "Account");
         }
+
+        // ================= YORUM YÖNETİMİ =================
+
+        [HttpGet]
+        public IActionResult Yorumlar()
+        {
+            // Güvenlik: Sadece giriş yapmış adminler görebilir
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+            {
+                return RedirectToAction("AdminLogin", "Account");
+            }
+
+            // Yorumları ve hangi ürüne yapıldığını tutacak dinamik bir liste oluşturuyoruz
+            var yorumListesi = new List<dynamic>();
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                // INNER JOIN kullanarak Reviews tablosu ile Products tablosunu birleştiriyoruz
+                // Böylece admin yorumun HANGİ ÜRÜNE yapıldığını ismen görebilir
+                string query = @"SELECT r.Id, p.UrunAdi, r.KullaniciAdi, r.Puan, r.YorumMetni, r.Tarih 
+                                 FROM Reviews r 
+                                 INNER JOIN Products p ON r.ProductId = p.Id 
+                                 ORDER BY r.Tarih DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Verileri isimsiz (anonymous) bir obje olarak listeye ekliyoruz
+                            yorumListesi.Add(new
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                UrunAdi = reader["UrunAdi"].ToString(),
+                                KullaniciAdi = reader["KullaniciAdi"].ToString(),
+                                Puan = Convert.ToInt32(reader["Puan"]),
+                                YorumMetni = reader["YorumMetni"].ToString(),
+                                Tarih = Convert.ToDateTime(reader["Tarih"]).ToString("dd.MM.yyyy HH:mm")
+                            });
+                        }
+                    }
+                }
+            }
+
+            ViewBag.Yorumlar = yorumListesi;
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult YorumSil(int id)
+        {
+            // Güvenlik kontrolü
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+            {
+                return RedirectToAction("AdminLogin", "Account");
+            }
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                string query = "DELETE FROM Reviews WHERE Id = @id";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            // Silme işlemi bitince admini tekrar yorumlar sayfasına yönlendiriyoruz
+            return RedirectToAction("Yorumlar");
+        }
+
     }
 }

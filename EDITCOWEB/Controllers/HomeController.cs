@@ -1,4 +1,4 @@
-using System.Diagnostics;
+ï»¿using System.Diagnostics;
 using EDITCOWEB.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -20,15 +20,13 @@ namespace EDITCOWEB.Controllers
 
         public IActionResult Index()
         {
-
             List<Campaign> aktifKampanyalar = new List<Campaign>();
-            List<Product> butunUrunler = new List<Product>(); // Bütün ürünleri tutacaðýmýz ana liste
+            List<Product> butunUrunler = new List<Product>();
 
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
-
             {
                 con.Open();
-                // 1. KAMPANYALARI ÇEKME
+                // 1. KAMPANYALARI Ã‡EKME
                 string queryKampanya = "SELECT * FROM Campaigns WHERE AktifMi = 1 ORDER BY Id DESC";
                 using (SqlCommand cmdKampanya = new SqlCommand(queryKampanya, con))
                 {
@@ -46,8 +44,13 @@ namespace EDITCOWEB.Controllers
                     }
                 }
 
-                // 2. BÜTÜN ÜRÜNLERÝ ÇEKME (Artýk TOP 8 deðil, hepsini çekiyoruz)
-                string queryUrun = "SELECT * FROM Products ORDER BY Id DESC";
+                // 2. BÃœTÃœN ÃœRÃœNLERÄ° Ã‡EKME (Ortalama Puan ve Yorum SayÄ±sÄ± hesaplamalarÄ± eklendi)
+                string queryUrun = @"
+                    SELECT *,
+                        ISNULL((SELECT AVG(CAST(Puan AS FLOAT)) FROM Reviews WHERE ProductId = Products.Id), 0) AS OrtalamaPuan,
+                        (SELECT COUNT(*) FROM Reviews WHERE ProductId = Products.Id) AS YorumSayisi
+                    FROM Products ORDER BY Id DESC";
+
                 using (SqlCommand cmdUrun = new SqlCommand(queryUrun, con))
                 {
                     using (SqlDataReader readerUrun = cmdUrun.ExecuteReader())
@@ -60,36 +63,34 @@ namespace EDITCOWEB.Controllers
                                 UrunAdi = readerUrun["UrunAdi"].ToString(),
                                 Kategori = readerUrun["Kategori"].ToString(),
                                 Fiyat = Convert.ToDecimal(readerUrun["Fiyat"]),
-                                ResimYolu = readerUrun["ResimYolu"].ToString()
+                                ResimYolu = readerUrun["ResimYolu"].ToString(),
+                                // Yeni eklenen Ã¶zellikler veritabanÄ±ndan alÄ±nÄ±yor
+                                OrtalamaPuan = Convert.ToDouble(readerUrun["OrtalamaPuan"]),
+                                YorumSayisi = Convert.ToInt32(readerUrun["YorumSayisi"])
                             });
                         }
                     }
                 }
             }
 
-            // 3. VÝTRÝNE GÖNDERMEDEN ÖNCE KATEGORÝLERE GÖRE AYIRMA ÝÞLEMÝ (Ýþte sihir burada!)
             ViewBag.Kampanyalar = aktifKampanyalar;
-
-            // Ürünleri "Kategori" ismine göre filtreleyip ayrý çantalara koyuyoruz
             ViewBag.Serumlar = butunUrunler.Where(u => u.Kategori == "Serum").ToList();
             ViewBag.Tonikler = butunUrunler.Where(u => u.Kategori == "Tonik").ToList();
-            ViewBag.GunesKremleri = butunUrunler.Where(u => u.Kategori == "Güneþ Kremi").ToList();
+            ViewBag.GunesKremleri = butunUrunler.Where(u => u.Kategori == "GÃ¼neÅŸ Kremi").ToList();
             ViewBag.Temizleyiciler = butunUrunler.Where(u => u.Kategori == "Temizleyici").ToList();
             ViewBag.Nemlendiriciler = butunUrunler.Where(u => u.Kategori == "Nemlendirici").ToList();
-
-            // Eðer "Yeni Gelenler" bölümünü de tutmak istersen, en son eklenen 8 ürünü ayrý bir çantaya koyabiliriz
             ViewBag.YeniGelenler = butunUrunler.Take(8).ToList();
 
             return View();
         }
 
 
-        // ================= ÜRÜNLER VE FÝLTRELEME SAYFASI =================
+        // ================= ÃœRÃœNLER VE FÄ°LTRELEME SAYFASI =================
         public IActionResult Urunler(List<string> ciltTipi, List<string> urunTuru, decimal? minFiyat, decimal? maxFiyat)
         {
             List<Product> filtrelenmisUrunler = new List<Product>();
 
-            // 1. Önce veritabanýndaki tüm ürünleri çekiyoruz
+            // 1. Ã–nce veritabanÄ±ndaki tÃ¼m Ã¼rÃ¼nleri Ã§ekiyoruz
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 con.Open();
@@ -104,9 +105,9 @@ namespace EDITCOWEB.Controllers
                             {
                                 Id = Convert.ToInt32(readerUrun["Id"]),
                                 UrunAdi = readerUrun["UrunAdi"].ToString(),
-                                // Ürün türü veritabanýnda "Kategori" olarak geçiyor
+                                // ÃœrÃ¼n tÃ¼rÃ¼ veritabanÄ±nda "Kategori" olarak geÃ§iyor
                                 Kategori = readerUrun["Kategori"].ToString(),
-                                // Eski ürünlerde CiltTipi boþ (DBNull) ise hata vermesin diye kontrol ediyoruz
+                                // Eski Ã¼rÃ¼nlerde CiltTipi boÅŸ (DBNull) ise hata vermesin diye kontrol ediyoruz
                                 CiltTipi = readerUrun["CiltTipi"] != DBNull.Value ? readerUrun["CiltTipi"].ToString() : "",
                                 Fiyat = Convert.ToDecimal(readerUrun["Fiyat"]),
                                 ResimYolu = readerUrun["ResimYolu"].ToString()
@@ -116,44 +117,44 @@ namespace EDITCOWEB.Controllers
                 }
             }
 
-            // 2. Cilt Tipine Göre Filtrele
+            // 2. Cilt Tipine GÃ¶re Filtrele
             if (ciltTipi != null && ciltTipi.Count > 0)
             {
                 filtrelenmisUrunler = filtrelenmisUrunler.Where(u => ciltTipi.Contains(u.CiltTipi)).ToList();
             }
 
-            // 3. Ürün Türüne (Kategoriye) Göre Filtrele
+            // 3. ÃœrÃ¼n TÃ¼rÃ¼ne (Kategoriye) GÃ¶re Filtrele
             if (urunTuru != null && urunTuru.Count > 0)
             {
                 filtrelenmisUrunler = filtrelenmisUrunler.Where(u => urunTuru.Contains(u.Kategori)).ToList();
             }
 
-            // 4. Minimum Fiyata Göre Filtrele
+            // 4. Minimum Fiyata GÃ¶re Filtrele
             if (minFiyat.HasValue)
             {
                 filtrelenmisUrunler = filtrelenmisUrunler.Where(u => u.Fiyat >= minFiyat).ToList();
             }
 
-            // 5. Maksimum Fiyata Göre Filtrele
+            // 5. Maksimum Fiyata GÃ¶re Filtrele
             if (maxFiyat.HasValue)
             {
                 filtrelenmisUrunler = filtrelenmisUrunler.Where(u => u.Fiyat <= maxFiyat).ToList();
             }
 
-            // Filtrelenmiþ listeyi Urunler.cshtml sayfasýna gönderiyoruz
+            // FiltrelenmiÅŸ listeyi Urunler.cshtml sayfasÄ±na gÃ¶nderiyoruz
             return View(filtrelenmisUrunler);
         }
 
 
 
-        // ================= ÜRÜN DETAY SAYFASI =================
+        // ================= ÃœRÃœN DETAY SAYFASI =================
         public IActionResult ProductDetail(int id)
         {
             Product secilenUrun = null;
 
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                // Týklanan ürünün ID'sine göre veritabanýndan o ürünü buluyoruz
+                // TÄ±klanan Ã¼rÃ¼nÃ¼n ID'sine gÃ¶re veritabanÄ±ndan o Ã¼rÃ¼nÃ¼ buluyoruz
                 string query = "SELECT * FROM Products WHERE Id = @Id";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@Id", id);
@@ -177,16 +178,97 @@ namespace EDITCOWEB.Controllers
                 }
             }
 
-            // Eðer ürün bulunamazsa veya silinmiþse, müþteriyi hata sayfasýna deðil anasayfaya geri gönderelim
+            // EÄŸer Ã¼rÃ¼n bulunamazsa veya silinmiÅŸse, mÃ¼ÅŸteriyi hata sayfasÄ±na deÄŸil anasayfaya geri gÃ¶nderelim
             if (secilenUrun == null)
             {
                 return RedirectToAction("Index");
             }
 
-            // Bulduðumuz ürünü detay sayfasýna gönderiyoruz
+
+            // --- YORUMLARI Ã‡EKME KISMI BAÅžLANGICI ---
+            List<Review> yorumlar = new List<Review>();
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                // Sadece bu Ã¼rÃ¼ne ait yorumlarÄ± tarihe gÃ¶re en yenisi en Ã¼stte olacak ÅŸekilde Ã§ekiyoruz
+                string queryReview = "SELECT * FROM Reviews WHERE ProductId = @id ORDER BY Tarih DESC";
+                using (SqlCommand cmdReview = new SqlCommand(queryReview, con))
+                {
+                    cmdReview.Parameters.AddWithValue("@id", id);
+                    using (SqlDataReader readerReview = cmdReview.ExecuteReader())
+                    {
+                        while (readerReview.Read())
+                        {
+                            yorumlar.Add(new Review
+                            {
+                                Id = Convert.ToInt32(readerReview["Id"]),
+                                ProductId = Convert.ToInt32(readerReview["ProductId"]),
+                                KullaniciAdi = readerReview["KullaniciAdi"].ToString(),
+                                Puan = Convert.ToInt32(readerReview["Puan"]),
+                                YorumMetni = readerReview["YorumMetni"].ToString(),
+                                Tarih = Convert.ToDateTime(readerReview["Tarih"])
+                            });
+                        }
+                    }
+                }
+            }
+            // Ã‡ektiÄŸimiz yorumlarÄ± View'da kullanabilmek iÃ§in ViewBag iÃ§ine atÄ±yoruz
+            ViewBag.Yorumlar = yorumlar;
+            // --- YORUMLARI Ã‡EKME KISMI BÄ°TÄ°ÅžÄ° ---
+
+
+            // BulduÄŸumuz Ã¼rÃ¼nÃ¼ detay sayfasÄ±na gÃ¶nderiyoruz
             return View(secilenUrun);
         }
 
+        // ================= YENÄ° YORUM EKLEME METODU (SESSION Ä°LE) =================
+        [HttpPost]
+        public IActionResult YorumEkle(int ProductId, int Puan, string YorumMetni)
+        {
+            // 1. Session'da "UserEmail" var mÄ± diye bakÄ±yoruz. Yoksa giriÅŸ sayfasÄ±na ÅŸutluyoruz.
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            string adSoyad = "Anonim"; // VarsayÄ±lan isim
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+
+                // 2. O maile sahip kullanÄ±cÄ±nÄ±n ADINI ve SOYADINI veritabanÄ±ndan Ã§ekiyoruz (Tam istediÄŸin gibi!)
+                string adQuery = "SELECT FirstName, LastName FROM Users WHERE Email = @Email";
+                using (SqlCommand adCmd = new SqlCommand(adQuery, con))
+                {
+                    adCmd.Parameters.AddWithValue("@Email", userEmail);
+                    using (SqlDataReader reader = adCmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            adSoyad = reader["FirstName"].ToString() + " " + reader["LastName"].ToString();
+                        }
+                    }
+                }
+
+                // 3. BulduÄŸumuz bu Ad-Soyad ile yorumu kaydediyoruz
+                string query = "INSERT INTO Reviews (ProductId, KullaniciAdi, Puan, YorumMetni) VALUES (@pId, @kAdi, @puan, @yorum)";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@pId", ProductId);
+                    cmd.Parameters.AddWithValue("@kAdi", adSoyad);
+                    cmd.Parameters.AddWithValue("@puan", Puan);
+                    cmd.Parameters.AddWithValue("@yorum", string.IsNullOrWhiteSpace(YorumMetni) ? (object)DBNull.Value : YorumMetni);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            TempData["YorumBasarili"] = "Yorumunuz baÅŸarÄ±yla kaydedildi. TeÅŸekkÃ¼r ederiz! ðŸ’–";
+
+            return RedirectToAction("ProductDetail", new { id = ProductId });
+        }
 
         public IActionResult Privacy()
         {

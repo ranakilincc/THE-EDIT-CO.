@@ -1,30 +1,33 @@
 ﻿@{
     Layout = null;
 }
+@using Microsoft.AspNetCore.Http
 
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Edit Co. | Admin Paneli</title>
+    <title>Yorum Yönetimi | The Edit Co. Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        /* Senin admin panelinin orijinal CSS kodları */
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f6f9;
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Sol Menü (Sidebar) */
         .sidebar {
             width: 260px;
             background-color: #333;
             color: white;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .sidebar-logo {
@@ -75,11 +78,11 @@
                 background-color: #c9302c;
             }
 
-        /* Sağ İçerik Alanı */
         .ana-icerik {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .ust-bar {
@@ -89,6 +92,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
         }
 
         .hosgeldin-mesaj {
@@ -99,62 +103,32 @@
         .icerik-alani {
             padding: 30px;
             overflow-y: auto;
+            flex-grow: 1;
         }
 
-        /* İstatistik Kartları */
-        .kart-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+        /* Yorum Tablosu CSS Kodları */
+        .yorum-tablosu {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .istatistik-kart {
-            background-color: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+            .yorum-tablosu th {
+                background-color: #f8f9fa;
+                color: #333;
+                padding: 15px;
+                text-align: left;
+                border-bottom: 2px solid #ddd;
+            }
 
-        .kart-ikon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .ikon-pembe {
-            background-color: #fdf5f6;
-            color: #e0a6aa;
-        }
-
-        .ikon-mavi {
-            background-color: #e3f2fd;
-            color: #2196f3;
-        }
-
-        .ikon-yesil {
-            background-color: #e8f5e9;
-            color: #4caf50;
-        }
-
-        .kart-bilgi h3 {
-            margin: 0;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .kart-bilgi p {
-            margin: 5px 0 0 0;
-            color: #777;
-            font-size: 14px;
-        }
+            .yorum-tablosu td {
+                padding: 15px;
+                border-bottom: 1px solid #eee;
+                color: #555;
+            }
     </style>
 </head>
 <body>
@@ -162,51 +136,59 @@
     <div class="sidebar">
         <div class="sidebar-logo">THE EDIT CO.</div>
         <ul class="menu-listesi">
-            <li><a href="#" class="aktif"><i class="fa-solid fa-chart-pie"></i> Gösterge Paneli</a></li>
+            <li><a href="/Admin/Index"><i class="fa-solid fa-chart-pie"></i> Gösterge Paneli</a></li>
             <li><a href="/Admin/Campaigns"><i class="fa-solid fa-bullhorn"></i> Kampanya Yönetimi</a></li>
             <li><a href="/Admin/Products"><i class="fa-solid fa-box"></i> Ürünler</a></li>
             <li><a href="#"><i class="fa-solid fa-users"></i> Müşteriler</a></li>
-            <li><a href="/Admin/Yorumlar"><i class="fa-regular fa-comments"></i> Yorumlar</a></li>
+            <li><a href="/Admin/Yorumlar" class="aktif"><i class="fa-regular fa-comments"></i> Yorumlar</a></li>
         </ul>
         <a href="/Admin/Logout" class="cikis-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap</a>
     </div>
 
     <div class="ana-icerik">
         <div class="ust-bar">
-            <h2>Gösterge Paneli</h2>
+            <h2>Yorum Yönetimi</h2>
             <div class="hosgeldin-mesaj">
-                <i class="fa-solid fa-user-shield"></i> Hoş Geldin, @ViewBag.AdminEmail
+                <i class="fa-solid fa-user-shield"></i> Hoş Geldin, @(Context.Session.GetString("AdminEmail") ?? "Admin")
             </div>
         </div>
 
         <div class="icerik-alani">
-            <div class="kart-grid">
-                <div class="istatistik-kart">
-                    <div class="kart-ikon ikon-pembe"><i class="fa-solid fa-bullhorn"></i></div>
-                    <div class="kart-bilgi">
-                        <h3>3</h3>
-                        <p>Aktif Kampanya</p>
-                    </div>
-                </div>
-                <div class="istatistik-kart">
-                    <div class="kart-ikon ikon-mavi"><i class="fa-solid fa-box-open"></i></div>
-                    <div class="kart-bilgi">
-                        <h3>24</h3>
-                        <p>Toplam Ürün</p>
-                    </div>
-                </div>
-                <div class="istatistik-kart">
-                    <div class="kart-ikon ikon-yesil"><i class="fa-solid fa-users"></i></div>
-                    <div class="kart-bilgi">
-                        <h3>@ViewBag.ToplamMusteri</h3>
-                        <p>Kayıtlı Müşteri</p>
-                    </div>
-                </div>
-            </div>
-
-            <p style="color: #666; font-size: 16px; background: white; padding: 20px; border-radius: 12px;">
-                E-ticaret sitenizin yönetim paneline hoş geldiniz. Sol taraftaki menüyü kullanarak sitenizi yönetmeye başlayabilirsiniz.
-            </p>
+            <table class="yorum-tablosu">
+                <thead>
+                    <tr>
+                        <th>Ürün Adı</th>
+                        <th>Kullanıcı</th>
+                        <th style="text-align: center;">Puan</th>
+                        <th>Yorum</th>
+                        <th>Tarih</th>
+                        <th style="text-align: center;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Yorumlar != null)
+                    {
+                        foreach (var yorum in ViewBag.Yorumlar)
+                        {
+                            <tr>
+                                <td style="font-weight: bold;">@yorum.UrunAdi</td>
+                                <td>@yorum.KullaniciAdi</td>
+                                <td style="text-align: center; color: #e0a6aa; font-weight: bold;">@yorum.Puan / 5</td>
+                                <td style="max-width: 300px;">@yorum.YorumMetni</td>
+                                <td style="font-size: 0.9rem; color: #999;">@yorum.Tarih</td>
+                                <td style="text-align: center;">
+                                    <form action="/Admin/YorumSil" method="post" onsubmit="return confirm('Bu yorumu silmek istediğinize emin misiniz?');">
+                                        <input type="hidden" name="id" value="@yorum.Id" />
+                                        <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                                            <i class="fa-solid fa-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 
