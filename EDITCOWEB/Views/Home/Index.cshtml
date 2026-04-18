@@ -206,12 +206,11 @@
 
 	</div>
 
-	<h4 class="kategori-baslik" id="serumlar">SERUMLAR</h4>
+	<h4 class="kategori-baslik" id="tonikler">SERUMLAR</h4>
 
 	<div class="ozel-urun-grid">
 		@if (ViewBag.Serumlar != null)
 		{
-			// Sadece "Serumlar" çantasındaki ürünleri döndürüyoruz!
 			foreach (var urun in ViewBag.Serumlar)
 			{
 				<div class="urun-karti-yeni">
@@ -223,14 +222,29 @@
 					<div class="urun-bilgileri">
 						<div class="marka-adi">THE EDIT CO.</div>
 						<div class="urun-ismi">@urun.UrunAdi</div>
+						<div style="color: #e0a6aa; font-size: 0.9rem; margin: 5px 0;">
+							@for (int i = 1; i <= 5; i++)
+							{
+								// Puan ortalamasını yuvarlayarak dolu veya boş pembe yıldız basıyoruz
+								if (i <= Math.Round(urun.OrtalamaPuan))
+								{
+									<i class="fa-solid fa-star"></i>
+								}
+								else
+								{
+									<i class="fa-regular fa-star"></i>
+								}
+							}
+							<span style="color: #888; font-size: 0.8rem; margin-left: 5px;">(@urun.YorumSayisi)</span>
+						</div>
 						<div class="urun-fiyati">@urun.Fiyat.ToString("N0") TL</div>
 					</div>
 				</div>
 			}
 		}
-    </div>
 
-
+	</div>
+	
 
 	<h4 class="kategori-baslik" id="tonikler">TONİKLER</h4>
 
@@ -448,51 +462,102 @@
 
 			@if (ViewBag.Kampanyalar != null && ViewBag.Kampanyalar.Count > 0)
 			{
-				// Veritabanındaki aktif kampanyaları tek tek dönüp ekrana basıyoruz
 				foreach (var kampanya in ViewBag.Kampanyalar)
 				{
-					<a href="#" style="min-width: 100%; display: block;">
+					<a href="#" style="min-width: 100%; display: block; position: relative;">
 						<img src="@kampanya.ResimYolu" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="@kampanya.Baslik">
+
+						<div class="fomo-sayac" data-bitis="@kampanya.BitisTarihi.ToString("yyyy-MM-ddTHH:mm:ss")"
+							 style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.75); color: white; padding: 8px 15px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; backdrop-filter: blur(4px); display: flex; gap: 12px; border: 1.5px solid #e0a6aa; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+							<div><span class="gun" style="color: #e0a6aa; font-size: 1.3rem; display: block; line-height: 1.2;">00</span> Gün</div>
+							<div><span class="saat" style="color: #e0a6aa; font-size: 1.3rem; display: block; line-height: 1.2;">00</span> Saat</div>
+							<div><span class="dakika" style="color: #e0a6aa; font-size: 1.3rem; display: block; line-height: 1.2;">00</span> Dk</div>
+							<div><span class="saniye" style="color: #e0a6aa; font-size: 1.3rem; display: block; line-height: 1.2;">00</span> Sn</div>
+						</div>
 					</a>
 				}
 			}
 			else
 			{
-				// Eğer admin panelinden henüz hiç kampanya eklenmemişse veya hepsi pasifse, site boş durmasın diye eski resimlerinden birini varsayılan olarak gösteriyoruz
 				<a href="#" style="min-width: 100%; display: block;">
 					<img src="~/images/kampanya/nemlendiricilerkampanya.png" style="width: 100%; height: 450px; object-fit: cover; object-position: center; display: block;" alt="The Edit Co. Kampanyaları">
 				</a>
 			}
-
 		</div>
 	</div>
 </section>
 
 <script>
-	//kampanyalar sliderı
-	document.addEventListener("DOMContentLoaded", function() {
-		// 1. Gerekli elementleri seçiyoruz
-		var serit = document.getElementById("slider-serit");
-		var slaytlar = serit.getElementsByTagName("a"); // Resimler 'a' etiketi içinde
-		var toplamSlayt = slaytlar.length;
-		var aktifSlayt = 0; // Başlangıçta 0. slayt (ilk resim)
+	document.addEventListener('DOMContentLoaded', function() {
+		const sayaclar = document.querySelectorAll('.fomo-sayac');
 
-		// 2. Slayt Değiştirme Fonksiyonu
-		function slaytDegistir() {
-			aktifSlayt++; // Sıradaki slayta geç
+		setInterval(() => {
+			const suAn = new Date().getTime();
 
-			// Eğer son slayta geldiysek, başa (0'a) dön
-			if (aktifSlayt >= toplamSlayt) {
-				aktifSlayt = 0;
-			}
+			sayaclar.forEach(sayac => {
+				const bitisTarihi = new Date(sayac.getAttribute('data-bitis')).getTime();
+				const kalanZaman = bitisTarihi - suAn;
 
-			// Şeridi sola doğru kaydır (%0, -%100, -%200...)
-			var kaydirmaMiktari = -(aktifSlayt * 100);
-			serit.style.transform = "translateX(" + kaydirmaMiktari + "%)";
+				if (kalanZaman > 0) {
+					const gun = Math.floor(kalanZaman / (1000 * 60 * 60 * 24));
+					const saat = Math.floor((kalanZaman % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+					const dakika = Math.floor((kalanZaman % (1000 * 60 * 60)) / (1000 * 60));
+					const saniye = Math.floor((kalanZaman % (1000 * 60)) / 1000);
+
+					sayac.querySelector('.gun').innerText = gun.toString().padStart(2, '0');
+					sayac.querySelector('.saat').innerText = saat.toString().padStart(2, '0');
+					sayac.querySelector('.dakika').innerText = dakika.toString().padStart(2, '0');
+					sayac.querySelector('.saniye').innerText = saniye.toString().padStart(2, '0');
+				} else {
+					sayac.innerHTML = "<span style='color:#e0a6aa; font-size: 1.5rem;'>KAMPANYA SONA ERDİ</span>";
+				}
+			});
+		}, 1000);
+	});
+</script>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+
+		// ================= 1. SLIDER (KAYDIRMA) MOTORU =================
+		const sliderSerit = document.getElementById('slider-serit');
+		const slaytlar = sliderSerit.querySelectorAll('a');
+		let aktifSlayt = 0;
+		const toplamSlayt = slaytlar.length;
+
+		// Eğer 1'den fazla kampanya varsa slider dönsün
+		if (toplamSlayt > 1) {
+			setInterval(() => {
+				// Her 4 saniyede bir sonraki slayta geç, sona gelince başa dön
+				aktifSlayt = (aktifSlayt + 1) % toplamSlayt;
+				sliderSerit.style.transform = `translateX(-${aktifSlayt * 100}%)`;
+			}, 4000); // 4000 milisaniye = 4 Saniye
 		}
 
-		// 3. Zamanlayıcıyı Başlat (3000ms = 3 Saniye yaptık, daha akıcı olacak!)
-		setInterval(slaytDegistir, 3000);
+		// ================= 2. FOMO GERİ SAYIM SAATİ =================
+		const sayaclar = document.querySelectorAll('.fomo-sayac');
+
+		setInterval(() => {
+			const suAn = new Date().getTime();
+
+			sayaclar.forEach(sayac => {
+				const bitisTarihi = new Date(sayac.getAttribute('data-bitis')).getTime();
+				const kalanZaman = bitisTarihi - suAn;
+
+				if (kalanZaman > 0) {
+					const gun = Math.floor(kalanZaman / (1000 * 60 * 60 * 24));
+					const saat = Math.floor((kalanZaman % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+					const dakika = Math.floor((kalanZaman % (1000 * 60 * 60)) / (1000 * 60));
+					const saniye = Math.floor((kalanZaman % (1000 * 60)) / 1000);
+
+					sayac.querySelector('.gun').innerText = gun.toString().padStart(2, '0');
+					sayac.querySelector('.saat').innerText = saat.toString().padStart(2, '0');
+					sayac.querySelector('.dakika').innerText = dakika.toString().padStart(2, '0');
+					sayac.querySelector('.saniye').innerText = saniye.toString().padStart(2, '0');
+				} else {
+					sayac.innerHTML = "<span style='color:#e0a6aa; font-size: 1.5rem;'>KAMPANYA SONA ERDİ</span>";
+				}
+			});
+		}, 1000);
 	});
 </script>
 

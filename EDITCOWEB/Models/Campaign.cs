@@ -7,5 +7,6 @@
         public string Aciklama { get; set; }
         public string ResimYolu { get; set; }
         public bool AktifMi { get; set; }
+        public DateTime BitisTarihi { get; set; }
     }
 }

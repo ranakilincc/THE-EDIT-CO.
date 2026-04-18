@@ -27,7 +27,7 @@ namespace EDITCOWEB.Controllers
             {
                 con.Open();
                 // 1. KAMPANYALARI ÇEKME
-                string queryKampanya = "SELECT * FROM Campaigns WHERE AktifMi = 1 ORDER BY Id DESC";
+                string queryKampanya = "SELECT * FROM Campaigns WHERE AktifMi = 1 AND BitisTarihi > GETDATE() ORDER BY Id DESC";
                 using (SqlCommand cmdKampanya = new SqlCommand(queryKampanya, con))
                 {
                     using (SqlDataReader readerKampanya = cmdKampanya.ExecuteReader())
@@ -38,7 +38,8 @@ namespace EDITCOWEB.Controllers
                             {
                                 Id = Convert.ToInt32(readerKampanya["Id"]),
                                 Baslik = readerKampanya["Baslik"].ToString(),
-                                ResimYolu = readerKampanya["ResimYolu"].ToString()
+                                ResimYolu = readerKampanya["ResimYolu"].ToString(),
+                                BitisTarihi = readerKampanya["BitisTarihi"] != DBNull.Value ? Convert.ToDateTime(readerKampanya["BitisTarihi"]) : DateTime.Now.AddDays(1)
                             });
                         }
                     }

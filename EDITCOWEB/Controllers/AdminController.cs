@@ -48,19 +48,19 @@ namespace EDITCOWEB.Controllers
         }
 
 
-        // ================= KAMPANYA YÖNETİMİ =================
+        // ================= KAMPANYA YÖNETİMİ (LİSTELEME) =================
         public IActionResult Campaigns()
         {
-            // 1. GÜVENLİK DUVARI: Sadece adminler girebilir
+            // 1. Güvenlik Duvarı
             var adminEmail = HttpContext.Session.GetString("AdminEmail");
             if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
 
-            // 2. KAMPANYALARI VERİTABANINDAN ÇEKME (Senin ADO.NET yönteminle)
+            // 2. Kampanyaları Çekme
             List<Campaign> kampanyaListesi = new List<Campaign>();
 
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                string query = "SELECT * FROM Campaigns ORDER BY Id DESC"; // En son eklenen en üstte görünsün
+                string query = "SELECT * FROM Campaigns ORDER BY Id DESC";
                 SqlCommand cmd = new SqlCommand(query, con);
 
                 con.Open();
@@ -74,18 +74,17 @@ namespace EDITCOWEB.Controllers
                         Baslik = reader["Baslik"].ToString(),
                         Aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "",
                         ResimYolu = reader["ResimYolu"].ToString(),
-                        AktifMi = Convert.ToBoolean(reader["AktifMi"])
+                        AktifMi = Convert.ToBoolean(reader["AktifMi"]),
+                        // DİKKAT: Bitiş Tarihini Veritabanından Okuyoruz
+                        BitisTarihi = reader["BitisTarihi"] != DBNull.Value ? Convert.ToDateTime(reader["BitisTarihi"]) : DateTime.MaxValue
                     });
                 }
             }
 
-            // 3. Bulunan kampanyaları tasarıma (View) gönder
             return View(kampanyaListesi);
         }
 
-        // ================= YENİ KAMPANYA EKLEME =================
-
-        // 1. Ekleme Sayfasını (Tasarımı) Ekrana Getiren Metot
+        // ================= YENİ KAMPANYA EKLEME (GET) =================
         [HttpGet]
         public IActionResult AddCampaign()
         {
@@ -95,57 +94,148 @@ namespace EDITCOWEB.Controllers
             return View();
         }
 
-        // 2. Formdan Gelen Resmi ve Bilgileri Kaydeden Metot
+        // ================= YENİ KAMPANYA EKLEME (POST) =================
         [HttpPost]
-        public IActionResult AddCampaign(string baslik, string aciklama, IFormFile resimDosyasi)
+        public IActionResult AddCampaign(string baslik, string aciklama, DateTime bitisTarihi, IFormFile resimDosyasi)
         {
             var adminEmail = HttpContext.Session.GetString("AdminEmail");
             if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
 
-            // Eğer gerçekten bir resim seçildiyse işlemleri yap
             if (resimDosyasi != null && resimDosyasi.Length > 0)
             {
-                // A) Sitenin içindeki wwwroot klasörüne "images/campaigns" diye bir yol belirliyoruz
                 string klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "campaigns");
 
-                // B) Eğer böyle bir klasör yoksa, otomatik olarak oluştur!
                 if (!Directory.Exists(klasorYolu))
                 {
                     Directory.CreateDirectory(klasorYolu);
                 }
 
-                // C) Resim isimleri çakışmasın diye (Örn: iki tane resim1.jpg olursa) ismin sonuna benzersiz bir kod ekliyoruz
                 string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(resimDosyasi.FileName);
                 string tamYol = Path.Combine(klasorYolu, dosyaAdi);
 
-                // D) Resmi seçtiğimiz bu klasöre fiziksel olarak kopyalıyoruz
                 using (var stream = new FileStream(tamYol, FileMode.Create))
                 {
                     resimDosyasi.CopyTo(stream);
                 }
 
-                // E) Veritabanına kaydetmek için resmin yolunu hazırlıyoruz (Örn: /images/campaigns/1234abcd.jpg)
                 string dbResimYolu = "/images/campaigns/" + dosyaAdi;
 
-                // F) Veritabanına (SQL) Kayıt İşlemi
                 using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    string query = "INSERT INTO Campaigns (Baslik, Aciklama, ResimYolu, AktifMi) VALUES (@Baslik, @Aciklama, @ResimYolu, 1)";
+                    // DİKKAT: BitisTarihi sütununu SQL sorgusuna ekledik
+                    string query = "INSERT INTO Campaigns (Baslik, Aciklama, ResimYolu, BitisTarihi, AktifMi) VALUES (@Baslik, @Aciklama, @ResimYolu, @BitisTarihi, 1)";
                     SqlCommand cmd = new SqlCommand(query, con);
 
                     cmd.Parameters.AddWithValue("@Baslik", baslik);
                     cmd.Parameters.AddWithValue("@Aciklama", aciklama ?? "");
                     cmd.Parameters.AddWithValue("@ResimYolu", dbResimYolu);
+                    cmd.Parameters.AddWithValue("@BitisTarihi", bitisTarihi);
 
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
             }
 
-            // İşlem başarıyla bitince bizi tekrar Kampanyalar listesine göndersin
             return RedirectToAction("Campaigns");
         }
 
+        // ================= KAMPANYA SİLME =================
+        public IActionResult DeleteCampaign(int id)
+        {
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "DELETE FROM Campaigns WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            return RedirectToAction("Campaigns");
+        }
+
+
+        // ================= KUPON YÖNETİMİ (LİSTELEME) =================
+        public IActionResult Coupons()
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null) return RedirectToAction("AdminLogin", "Account");
+
+            List<Coupon> kuponListesi = new List<Coupon>();
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "SELECT * FROM Coupons ORDER BY Id DESC";
+                SqlCommand cmd = new SqlCommand(query, con);
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    kuponListesi.Add(new Coupon
+                    {
+                        Id = (int)reader["Id"],
+                        Kod = reader["Kod"].ToString(),
+                        IndirimYuzdesi = (int)reader["IndirimYuzdesi"],
+                        BitisTarihi = (DateTime)reader["BitisTarihi"],
+                        AktifMi = (bool)reader["AktifMi"]
+                    });
+                }
+            }
+            return View(kuponListesi);
+        }
+
+        // ================= YENİ KUPON EKLEME (POST) =================
+        [HttpPost]
+        public IActionResult AddCoupon(string kod, int indirimYuzdesi, DateTime bitisTarihi, int altLimit)
+        {
+            // Giriş yapmamışsa login sayfasına gönder
+            if (HttpContext.Session.GetString("AdminEmail") == null) return RedirectToAction("AdminLogin", "Account");
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                // SQL Sorgusu: Artık AltLimit'i de içeri ekliyoruz
+                string query = "INSERT INTO Coupons (Kod, IndirimYuzdesi, BitisTarihi, AktifMi, AltLimit) VALUES (@Kod, @IndirimYuzdesi, @BitisTarihi, 1, @AltLimit)";
+
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Kod", kod.ToUpper());
+                cmd.Parameters.AddWithValue("@IndirimYuzdesi", indirimYuzdesi);
+                cmd.Parameters.AddWithValue("@BitisTarihi", bitisTarihi);
+                cmd.Parameters.AddWithValue("@AltLimit", altLimit); 
+
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            // İşlem bitince listeye geri dön
+            return RedirectToAction("Coupons");
+        }
+
+        // ================= YENİ KUPON EKLEME (SAYFAYI AÇAN KISIM) =================
+        [HttpGet]
+        public IActionResult AddCoupon()
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null) return RedirectToAction("AdminLogin", "Account");
+
+            return View();
+        }
+
+        // ================= KUPON SİLME =================
+        public IActionResult DeleteCoupon(int id)
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null) return RedirectToAction("AdminLogin", "Account");
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "DELETE FROM Coupons WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+            return RedirectToAction("Coupons");
+        }
 
         // ================= ÜRÜN YÖNETİMİ =================
         public IActionResult Products()

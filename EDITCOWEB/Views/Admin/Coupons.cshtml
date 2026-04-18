@@ -1,4 +1,4 @@
-﻿@model List<EDITCOWEB.Models.Campaign>
+﻿@model List<EDITCOWEB.Models.Coupon>
 @{
     Layout = null;
 }
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Edit Co. | Kampanya Yönetimi</title>
+    <title>The Edit Co. | Kupon Yönetimi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body {
@@ -19,7 +19,7 @@
             height: 100vh;
         }
 
-        /* Sol Menü (Index sayfasındakiyle aynı) */
+        /* Sol Menü */
         .sidebar {
             width: 260px;
             background-color: #333;
@@ -97,7 +97,7 @@
             overflow-y: auto;
         }
 
-        /* Kampanya Sayfasına Özel Stiller */
+        /* Sayfa Özel Stilleri */
         .baslik-alani {
             display: flex;
             justify-content: space-between;
@@ -149,12 +149,20 @@
             font-size: 14px;
         }
 
-        .kampanya-resim {
-            width: 120px;
-            height: 50px;
-            object-fit: cover;
+        .kupon-kodu {
+            font-family: monospace;
+            background: #f1f3f4;
+            padding: 5px 10px;
             border-radius: 6px;
-            border: 1px solid #ddd;
+            font-weight: bold;
+            color: #333;
+            letter-spacing: 1px;
+        }
+
+        .indirim-orani {
+            color: #e0a6aa;
+            font-weight: 900;
+            font-size: 1.2rem;
         }
 
         .durum-aktif {
@@ -199,9 +207,9 @@
         <div class="sidebar-logo">THE EDIT CO.</div>
         <ul class="menu-listesi">
             <li><a href="/Admin/Index"><i class="fa-solid fa-chart-pie"></i> Gösterge Paneli</a></li>
-            <li><a href="/Admin/Campaigns" class="aktif"><i class="fa-solid fa-bullhorn"></i> Kampanya Yönetimi</a></li>
-            <li><a href="/Admin/Coupons"><i class="fa-solid fa-ticket"></i> Kupon Yönetimi</a></li>
-            <li><a href="#"><i class="fa-solid fa-box"></i> Ürünler</a></li>
+            <li><a href="/Admin/Campaigns"><i class="fa-solid fa-bullhorn"></i> Kampanya Yönetimi</a></li>
+            <li><a href="/Admin/Coupons" class="aktif"><i class="fa-solid fa-ticket"></i> Kupon Yönetimi</a></li>
+            <li><a href="/Admin/Products"><i class="fa-solid fa-box"></i> Ürünler</a></li>
             <li><a href="#"><i class="fa-solid fa-users"></i> Müşteriler</a></li>
             <li><a href="/Admin/Yorumlar"><i class="fa-regular fa-comments"></i> Yorumlar</a></li>
         </ul>
@@ -210,22 +218,22 @@
 
     <div class="ana-icerik">
         <div class="ust-bar">
-            <h2>Kampanya Yönetimi</h2>
+            <h2>Kupon & İndirim Kodu Yönetimi</h2>
         </div>
 
         <div class="icerik-alani">
             <div class="baslik-alani">
-                <p style="color: #666; margin: 0;">Sitenin anasayfasındaki kayan görselleri (slider) buradan yönetebilirsiniz.</p>
-                <a href="/Admin/AddCampaign" class="btn-ekle"><i class="fa-solid fa-plus"></i> Yeni Kampanya Ekle</a>
+                <p style="color: #666; margin: 0;">Müşterilerinizin sepette kullanabileceği özel indirim kodlarını buradan yönetin.</p>
+                <a href="/Admin/AddCoupon" class="btn-ekle"><i class="fa-solid fa-plus"></i> Yeni Kupon Üret</a>
             </div>
 
             <div class="tablo-kapsayici">
-                @if (Model.Count == 0)
+                @if (Model == null || Model.Count == 0)
                 {
                     <div class="bos-durum">
-                        <i class="fa-solid fa-image" style="font-size: 40px; color: #ddd; margin-bottom: 15px;"></i>
-                        <p>Henüz hiç kampanya eklenmemiş.</p>
-                        <p style="font-size: 14px;">İlk kampanyayı eklemek için sağ üstteki butonu kullanın.</p>
+                        <i class="fa-solid fa-ticket-simple" style="font-size: 40px; color: #ddd; margin-bottom: 15px;"></i>
+                        <p>Henüz sistemde tanımlı bir indirim kuponu bulunmuyor.</p>
+                        <p style="font-size: 14px;">İlk kodu üretmek için sağ üstteki butonu kullanın.</p>
                     </div>
                 }
                 else
@@ -233,28 +241,30 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Görsel</th>
-                                <th>Başlık</th>
+                                <th>Kupon Kodu</th>
+                                <th>İndirim Oranı</th>
+                                <th>Bitiş Tarihi</th>
                                 <th>Durum</th>
                                 <th>İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var kampanya in Model)
+                            @foreach (var kupon in Model)
                             {
                                 <tr>
-                                    <td><img src="@kampanya.ResimYolu" class="kampanya-resim" alt="Kampanya" /></td>
-                                    <td>@kampanya.Baslik</td>
+                                    <td><span class="kupon-kodu">@kupon.Kod</span></td>
+                                    <td><span class="indirim-orani">%@kupon.IndirimYuzdesi</span></td>
+                                    <td>@kupon.BitisTarihi.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td>
-                                        @if (kampanya.BitisTarihi < DateTime.Now)
+                                        @if (kupon.BitisTarihi < DateTime.Now)
                                         {
                                             <span style="background-color: #f1f3f4; color: #5f6368; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px;">
                                                 Süresi Doldu
                                             </span>
                                         }
-                                        else if (kampanya.AktifMi)
+                                        else if (kupon.AktifMi)
                                         {
-                                            <span class="durum-aktif">Yayında</span>
+                                            <span class="durum-aktif">Geçerli</span>
                                         }
                                         else
                                         {
@@ -262,7 +272,9 @@
                                         }
                                     </td>
                                     <td>
-                                        <a href="/Admin/DeleteCampaign/@kampanya.Id" class="btn-sil" title="Sil"><i class="fa-solid fa-trash"></i></a>
+                                        <a href="/Admin/DeleteCoupon/@kupon.Id" class="btn-sil" title="Sil" onclick="return confirm('Bu kuponu silmek istediğinize emin misiniz?');">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             }
