@@ -40,23 +40,36 @@
             </button>
             <div style="display: flex; align-items: center; gap: 20px;">
 
+                <div class="coupon-section" style="margin-top: 20px; padding: 15px; border: 1px dashed #e0a6aa; border-radius: 10px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">İndirim Kuponunuz mu var?</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="couponCode" placeholder="KOD GİRİN..."
+                               style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; text-transform: uppercase;">
+                        <button type="button" onclick="applyCoupon()"
+                                style="background-color: #e0a6aa; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            Uygula
+                        </button>
+                    </div>
+                    <div id="couponMessage" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></div>
+                </div>
+
                 <h4 style="margin: 0; color: black;">
                     Toplam: <span id="sepet-toplam" style="color: black; font-weight: bold; font-size: 1.4rem;">0 TL</span>
                 </h4>
 
-                <a asp-controller="Checkout" asp-action="Index" class="btn" style="
-        background-color: #e0a6aa;
-        color: black;
-        padding: 12px 40px;
-        border-radius: 30px;
-        border: none;
-        font-size: 1.1rem;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(224, 166, 170, 0.3);
-        transition: transform 0.2s;
-        text-decoration: none;
-        display: inline-block;">
+                <a href="javascript:void(0);" onclick="odemeSayfasinaGit()" class="btn" style="
+    background-color: #e0a6aa;
+    color: black;
+    padding: 12px 40px;
+    border-radius: 30px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(224, 166, 170, 0.3);
+    transition: transform 0.2s;
+    text-decoration: none;
+    display: inline-block;">
                     Ödemeye Geç
                 </a>
             </div>
@@ -146,5 +159,75 @@
             localStorage.removeItem("sepetim");
             localStorage.setItem("sepetSayisi", 0);
             listeyiGetir();
+        }
+
+
+                function odemeSayfasinaGit() {
+            var toplamSpan = document.getElementById("sepet-toplam");
+            var sonFiyat = "";
+
+            // Eğer kupon uygulanmışsa (yani içinde bir <span> varsa)
+            var indirimliSpan = toplamSpan.querySelector("span");
+
+            if (indirimliSpan) {
+                // İndirimli fiyatı al
+                sonFiyat = indirimliSpan.innerText;
+            } else {
+                // Kupon yoksa normal fiyatı al
+                sonFiyat = toplamSpan.innerText;
+            }
+
+            // Fiyatı temizle (TL ve boşlukları at) ve kaydet
+            var temizFiyat = sonFiyat.replace("TL", "").trim();
+            localStorage.setItem("odenecekTutar", temizFiyat);
+
+            // Şimdi arkadaşının sayfasına yönlendir
+            window.location.href = "/Checkout/Index";
+        }
+
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        function applyCoupon() {
+            var code = document.getElementById("couponCode").value;
+            var messageDiv = document.getElementById("couponMessage");
+            var toplamSpan = document.getElementById("sepet-toplam"); // ID'nin doğru olduğundan emin ol
+
+            if (code === "") {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "Lütfen bir kod giriniz!";
+                return;
+            }
+
+            $.post("/Cart/CheckCoupon", { code: code }, function (data) {
+                if (data.success) {
+                    // Fiyatı temizle ve sayıya çevir
+                    let mevcutToplam = parseFloat(toplamSpan.innerText.replace("TL", "").replace(".", "").replace(",", ".").trim());
+
+                    if (mevcutToplam < data.minLimit) {
+                        messageDiv.style.color = "orange";
+                        messageDiv.innerText = "Bu kupon için sepet en az " + data.minLimit + " TL olmalı!";
+                        return;
+                    }
+
+                    messageDiv.style.color = "green";
+                    messageDiv.innerText = data.message;
+
+                    let indirimMiktari = (mevcutToplam * data.discountPercent) / 100;
+                    let yeniToplam = mevcutToplam - indirimMiktari;
+
+                    // Fiyatı ekranda güncelle
+                    toplamSpan.innerHTML = `<del style='color:gray;'>${mevcutToplam} TL</del> <span style='color:black;'>${yeniToplam} TL</span>`;
+
+                    // ÖNEMLİ: İndirimli fiyatı localStorage'a kaydet ki arkadaşının ödeme sayfası oradan çeksin
+                    localStorage.setItem("indirimliToplam", yeniToplam);
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.innerText = data.message;
+                }
+            });
         }
     </script>
