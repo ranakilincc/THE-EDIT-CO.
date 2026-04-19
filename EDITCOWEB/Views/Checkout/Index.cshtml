@@ -1,0 +1,227 @@
+﻿@model TheEditCo.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Ödeme Sayfası";
+}
+
+<style>
+    .checkout-wrapper {
+        margin-top: 140px;
+        display: flex;
+        justify-content: center;
+        padding: 30px 20px 60px 20px;
+    }
+
+    .checkout-card {
+        width: 100%;
+        max-width: 850px;
+        background: #fff;
+        border-radius: 28px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .checkout-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2f2f2f;
+        margin-bottom: 30px;
+    }
+
+    .checkout-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #3d3d3d;
+        margin-bottom: 20px;
+    }
+
+    .checkout-form-group {
+        margin-bottom: 18px;
+    }
+
+    .checkout-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a4a4a;
+    }
+
+    .checkout-input,
+    .checkout-textarea {
+        width: 100%;
+        border: 1px solid #e4c7cb;
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-size: 1rem;
+        outline: none;
+        background-color: #fffafb;
+        transition: 0.2s ease;
+        box-sizing: border-box;
+    }
+
+        .checkout-input:focus,
+        .checkout-textarea:focus {
+            border-color: #d89aa2;
+            box-shadow: 0 0 0 3px rgba(224, 166, 170, 0.18);
+        }
+
+    .checkout-textarea {
+        min-height: 110px;
+        resize: vertical;
+    }
+
+    .checkout-row {
+        display: flex;
+        gap: 16px;
+    }
+
+    .checkout-col {
+        flex: 1;
+    }
+
+    .checkout-divider {
+        border: none;
+        border-top: 1px solid #f0d9dc;
+        margin: 28px 0;
+    }
+
+    .checkout-button {
+        width: 100%;
+        margin-top: 28px;
+        background-color: #e0a6aa;
+        color: #2d1f21;
+        border: none;
+        border-radius: 999px;
+        padding: 15px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s ease;
+        box-shadow: 0 8px 18px rgba(224, 166, 170, 0.28);
+    }
+
+        .checkout-button:hover {
+            transform: translateY(-2px);
+            background-color: #d9969c;
+        }
+
+    .field-validation-error {
+        color: #c0392b;
+        font-size: 0.9rem;
+        margin-top: 6px;
+        display: block;
+    }
+
+    .validation-summary-errors {
+        color: #c0392b;
+        background: #fff1f1;
+        border: 1px solid #f3c5c5;
+        padding: 12px 14px;
+        border-radius: 12px;
+        margin-bottom: 18px;
+    }
+
+    @@media (max-width: 768px) {
+        .checkout-card {
+            padding: 24px;
+        }
+
+        .checkout-row {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .checkout-title {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+
+<div class="checkout-wrapper">
+    <div class="checkout-card">
+        <h2 class="checkout-title">Ödeme Bilgileri</h2>
+
+        <form asp-action="Index" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <h4 class="checkout-section-title">Teslimat Bilgileri</h4>
+
+            <div class="checkout-form-group">
+                <label asp-for="FullName" class="checkout-label">Ad Soyad</label>
+                <input asp-for="FullName" class="checkout-input" />
+                <span asp-validation-for="FullName"></span>
+            </div>
+
+            <div class="checkout-form-group">
+                <label asp-for="PhoneNumber" class="checkout-label">Telefon</label>
+                <input asp-for="PhoneNumber" class="checkout-input" />
+                <span asp-validation-for="PhoneNumber"></span>
+            </div>
+
+            <div class="checkout-form-group">
+                <label asp-for="AddressLine" class="checkout-label">Adres</label>
+                <textarea asp-for="AddressLine" class="checkout-textarea"></textarea>
+                <span asp-validation-for="AddressLine"></span>
+            </div>
+
+            <div class="checkout-row">
+                <div class="checkout-col">
+                    <div class="checkout-form-group">
+                        <label asp-for="City" class="checkout-label">Şehir</label>
+                        <input asp-for="City" class="checkout-input" />
+                        <span asp-validation-for="City"></span>
+                    </div>
+                </div>
+
+                <div class="checkout-col">
+                    <div class="checkout-form-group">
+                        <label asp-for="PostalCode" class="checkout-label">Posta Kodu</label>
+                        <input asp-for="PostalCode" class="checkout-input" />
+                        <span asp-validation-for="PostalCode"></span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="checkout-divider" />
+
+            <h4 class="checkout-section-title">Kart Bilgileri</h4>
+
+            <div class="checkout-form-group">
+                <label asp-for="CardHolderName" class="checkout-label">Kart Üzerindeki İsim</label>
+                <input asp-for="CardHolderName" class="checkout-input" />
+                <span asp-validation-for="CardHolderName"></span>
+            </div>
+
+            <div class="checkout-form-group">
+                <label asp-for="CardNumber" class="checkout-label">Kart Numarası</label>
+                <input asp-for="CardNumber" class="checkout-input" />
+                <span asp-validation-for="CardNumber"></span>
+            </div>
+
+            <div class="checkout-row">
+                <div class="checkout-col">
+                    <div class="checkout-form-group">
+                        <label asp-for="ExpiryDate" class="checkout-label">Son Kullanma Tarihi</label>
+                        <input asp-for="ExpiryDate" class="checkout-input" placeholder="AA/YY" />
+                        <span asp-validation-for="ExpiryDate"></span>
+                    </div>
+                </div>
+
+                <div class="checkout-col">
+                    <div class="checkout-form-group">
+                        <label asp-for="CVV" class="checkout-label">CVV</label>
+                        <input asp-for="CVV" class="checkout-input" />
+                        <span asp-validation-for="CVV"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="checkout-button">
+                Siparişi Tamamla
+            </button>
+        </form>
+    </div>
+</div>
+

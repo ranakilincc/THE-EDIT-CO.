@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Sipariş Başarılı";
+}
+
+<div style="margin-top: 140px; display: flex; justify-content: center; padding: 30px 20px;">
+    <div style="
+        background: white;
+        max-width: 700px;
+        width: 100%;
+        border-radius: 28px;
+        padding: 50px 35px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        text-align: center;">
+
+        <h2 style="font-size: 2rem; margin-bottom: 15px; color: #2f2f2f;">
+            Siparişiniz Başarıyla Alındı 🎉
+        </h2>
+
+        <p style="font-size: 1.05rem; color: #666; margin-bottom: 30px;">
+            The Edit Co. ailesi olarak teşekkür ederiz. Siparişiniz alınmıştır.
+        </p>
+
+        <a asp-controller="Home" asp-action="Index" style="
+            display: inline-block;
+            background-color: #e0a6aa;
+            color: black;
+            padding: 14px 30px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 8px 18px rgba(224,166,170,0.28);">
+            Ana Sayfaya Dön
+        </a>
+    </div>
+</div>

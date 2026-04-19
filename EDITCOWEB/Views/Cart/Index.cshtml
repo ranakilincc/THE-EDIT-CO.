@@ -1,7 +1,6 @@
 ﻿@{
     Layout = "_Layout";
     ViewData["Title"] = "Sepetim";
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 }
 
 <div class="container" style="margin-top: 80px; min-height: 400px;">
@@ -39,50 +38,36 @@
                 transition: transform 0.2s;">
                 Sepeti Temizle
             </button>
-
-            <div class="coupon-section" style="margin-top: 20px; padding: 15px; border: 1px dashed #e0a6aa; border-radius: 10px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">İndirim Kuponunuz mu var?</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="couponCode" placeholder="Kodu buraya girin..."
-                           style="flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; text-transform: uppercase;">
-                    <button type="button" onclick="applyCoupon()"
-                            style="background-color: #e0a6aa; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        Uygula
-                    </button>
-                </div>
-                <div id="couponMessage" style="margin-top: 10px; font-size: 0.9rem; font-weight: bold;"></div>
-            </div>
-
             <div style="display: flex; align-items: center; gap: 20px;">
 
                 <h4 style="margin: 0; color: black;">
                     Toplam: <span id="sepet-toplam" style="color: black; font-weight: bold; font-size: 1.4rem;">0 TL</span>
                 </h4>
 
-                <button class="btn" style="
-                background-color: #e0a6aa;
-                color: black;
-                padding: 12px 40px;
-                border-radius: 30px;
-                border: none;
-                font-size: 1.1rem;
-                font-weight: bold;
-                cursor: pointer;
-                box-shadow: 0 4px 6px rgba(224, 166, 170, 0.3);
-                transition: transform 0.2s;">
+                <a asp-controller="Checkout" asp-action="Index" class="btn" style="
+        background-color: #e0a6aa;
+        color: black;
+        padding: 12px 40px;
+        border-radius: 30px;
+        border: none;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(224, 166, 170, 0.3);
+        transition: transform 0.2s;
+        text-decoration: none;
+        display: inline-block;">
                     Ödemeye Geç
-                </button>
+                </a>
             </div>
 
         </div>
 
-    </div>
-
-    <!-- SEPET BOŞ -->
-    <div id="sepet-bos" style="text-align: center; padding: 60px; display: none;">
-        <i class="fa-solid fa-basket-shopping" style="font-size: 60px; color: black; margin-bottom: 20px;"></i>
-        <p style="font-size: 18px; color:black;">Sepetinizde henüz ürün yok.</p>
-        <a href="/#urunler" class="btn" style="
+        <!-- SEPET BOŞ -->
+        <div id="sepet-bos" style="text-align: center; padding: 60px; display: none;">
+            <i class="fa-solid fa-basket-shopping" style="font-size: 60px; color: black; margin-bottom: 20px;"></i>
+            <p style="font-size: 18px; color:black;">Sepetinizde henüz ürün yok.</p>
+            <a href="/#urunler" class="btn" style="
             background-color: #e0a6aa;
             color: black;
             border-radius: 30px;
@@ -92,119 +77,74 @@
             box-shadow: 0 5px 15px rgba(224, 166, 170, 0.4);
             display: inline-block; /* Butonun şeklini korur */
         ">
-            Alışverişe Başla
-        </a>
+                Alışverişe Başla
+            </a>
+        </div>
     </div>
-</div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            listeyiGetir();
+        });
 
-<script>
+        function listeyiGetir() {
+            var sepet = JSON.parse(localStorage.getItem("sepetim")) || [];
+            var liste = document.getElementById("sepet-listesi");
+            var toplam = 0;
 
-    document.addEventListener("DOMContentLoaded", function () {
-        listeyiGetir();
-    });
+            liste.innerHTML = "";
 
-       function applyCoupon() {
-        var code = document.getElementById("couponCode").value;
-        var messageDiv = document.getElementById("couponMessage");
-        var toplamSpan = document.getElementById("sepet-toplam");
-
-        if (code === "") {
-            messageDiv.style.color = "red";
-            messageDiv.innerText = "Lütfen bir kod giriniz!";
-            return;
-        }
-
-        // Controller'a haber gönderiyoruz
-        $.post("/Cart/CheckCoupon", { code: code }, function (data) {
-            if (data.success) {
-                // Mevcut toplamı sayıya çeviriyoruz (Nokta ve TL temizliği)
-                let mevcutToplam = parseFloat(toplamSpan.innerText.replace("TL", "").replace(".", "").replace(",", ".").trim());
-
-                // --- YENİ EKLENEN ALT LİMİT KONTROLÜ ---
-                if (mevcutToplam < data.minLimit) {
-                    messageDiv.style.color = "red";
-                    messageDiv.innerText = "Bu kuponu kullanabilmek için sepet tutarınız en az " + data.minLimit + " TL olmalıdır!";
-                    return; // Alt limit sağlanmadıysa burada durduruyoruz
-                }
-                // --------------------------------------
-
-                messageDiv.style.color = "green";
-                messageDiv.innerText = data.message;
-
-                let indirimMiktari = (mevcutToplam * data.discountPercent) / 100;
-                let yeniToplam = mevcutToplam - indirimMiktari;
-
-                // Ekranda eski fiyatın üzerini çizip yenisini yazıyoruz
-                toplamSpan.innerHTML = `
-                    <del style='color:gray; font-size:1rem;'>${mevcutToplam.toLocaleString('tr-TR')} TL</del>
-                    <span style="color: #e0a6aa; margin-left:10px;">${yeniToplam.toLocaleString('tr-TR')} TL</span>
-                `;
-            } else {
-                messageDiv.style.color = "red";
-                messageDiv.innerText = data.message;
+            if (sepet.length === 0) {
+                document.getElementById("sepet-dolu").style.display = "none";
+                document.getElementById("sepet-bos").style.display = "block";
+                return;
             }
-        });
-    }
 
-    function listeyiGetir() {
-        var sepet = JSON.parse(localStorage.getItem("sepetim")) || [];
-        var liste = document.getElementById("sepet-listesi");
-        var toplam = 0;
+            document.getElementById("sepet-dolu").style.display = "block";
+            document.getElementById("sepet-bos").style.display = "none";
 
-        liste.innerHTML = "";
+            sepet.forEach(function (urun, index) {
+                    // Yeni Güvenli Satır:
+        var hamFiyat = urun.fiyat ? urun.fiyat.toString().replace("TL", "").trim() : "0";
+        var fiyat = parseFloat(hamFiyat) || 0; // Eğer sayıya çevrilemezse 0 kabul et
+                toplam += fiyat;
 
-        if (sepet.length === 0) {
-            document.getElementById("sepet-dolu").style.display = "none";
-            document.getElementById("sepet-bos").style.display = "block";
-            return;
+                    // Sepet Sayfasındaki Scriptin İçi:
+
+            // Sepet sayfasındaki scriptin içindeki döngü kısmı:
+
+        liste.innerHTML += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 15px; display: flex; align-items: center; gap: 20px;">
+                    <img src="${urun.resim}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;" onerror="this.src='/images/yok.png'">
+                    <span style="font-weight: 600; font-size: 1.1rem; color: #333;">${urun.ad}</span>
+                </td>
+                <td style="padding: 15px; vertical-align: middle; font-size: 1.1rem; color: #555;">
+                    ${urun.fiyat}
+                </td>
+                <td style="padding: 15px; vertical-align: middle; text-align: center;">
+                    <button onclick="urunuSil(${index})" style="background: none; border: none; color: #dc3545; font-size: 1.5rem; cursor: pointer; transition: color 0.3s;">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+            });
+
+            document.getElementById("sepet-toplam").innerText = toplam + " TL";
         }
 
-        document.getElementById("sepet-dolu").style.display = "block";
-        document.getElementById("sepet-bos").style.display = "none";
+        function urunuSil(index) {
+            var sepet = JSON.parse(localStorage.getItem("sepetim")) || [];
+            sepet.splice(index, 1);
+            localStorage.setItem("sepetim", JSON.stringify(sepet));
+            localStorage.setItem("sepetSayisi", sepet.length);
+            listeyiGetir();
+        }
 
-        sepet.forEach(function (urun, index) {
-                // Yeni Güvenli Satır:
-    var hamFiyat = urun.fiyat ? urun.fiyat.toString().replace("TL", "").trim() : "0";
-    var fiyat = parseFloat(hamFiyat) || 0; // Eğer sayıya çevrilemezse 0 kabul et
-            toplam += fiyat;
-
-                // Sepet Sayfasındaki Scriptin İçi:
-
-        // Sepet sayfasındaki scriptin içindeki döngü kısmı:
-
-    liste.innerHTML += `
-        <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 15px; display: flex; align-items: center; gap: 20px;">
-                <img src="${urun.resim}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;" onerror="this.src='/images/yok.png'">
-                <span style="font-weight: 600; font-size: 1.1rem; color: #333;">${urun.ad}</span>
-            </td>
-            <td style="padding: 15px; vertical-align: middle; font-size: 1.1rem; color: #555;">
-                ${urun.fiyat}
-            </td>
-            <td style="padding: 15px; vertical-align: middle; text-align: center;">
-                <button onclick="urunuSil(${index})" style="background: none; border: none; color: #dc3545; font-size: 1.5rem; cursor: pointer; transition: color 0.3s;">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `;
-        });
-
-        document.getElementById("sepet-toplam").innerText = toplam + " TL";
-    }
-
-    function urunuSil(index) {
-        var sepet = JSON.parse(localStorage.getItem("sepetim")) || [];
-        sepet.splice(index, 1);
-        localStorage.setItem("sepetim", JSON.stringify(sepet));
-        localStorage.setItem("sepetSayisi", sepet.length);
-        listeyiGetir();
-    }
-
-    function sepetiBosalt() {
-        localStorage.removeItem("sepetim");
-        localStorage.setItem("sepetSayisi", 0);
-        listeyiGetir();
-    }
-</script>
+        function sepetiBosalt() {
+            localStorage.removeItem("sepetim");
+            localStorage.setItem("sepetSayisi", 0);
+            listeyiGetir();
+        }
+    </script>
