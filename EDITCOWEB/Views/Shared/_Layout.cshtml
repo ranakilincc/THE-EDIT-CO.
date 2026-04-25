@@ -339,33 +339,68 @@
             }
         }
 
-        // Python API'sine mesaj gönderen fonksiyon (Daha önce konuştuğumuz B planı)
+        // Python API'sine mesaj gönderen ve arayüzü yöneten fonksiyon
         async function sendToAI() {
             const input = document.getElementById('userInput');
             const msgDiv = document.getElementById('messages');
-            if (!input.value) return;
+            const userText = input.value.trim();
 
-            // Kullanıcı mesajı ekle
-            msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #e0a6aa; color: white; padding: 10px; border-radius: 15px; max-width: 80%; margin-left: auto; font-size: 14px;">${input.value}</div>`;
+            if (!userText) return; // Boş mesaj gönderilmesini engelle
 
-            const userText = input.value;
+            // 1. Kullanıcı mesajını ekrana ekle (Toz Pembe Balon)
+            msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #e0a6aa; color: white; padding: 10px; border-radius: 15px; max-width: 80%; margin-left: auto; font-size: 14px;">${userText}</div>`;
             input.value = "";
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
+            // 2. Bekleme (Düşünüyor...) Balonunu Ekle (Lila-Mavi İtalik Yazı)
+            const typingId = "typing-" + Date.now();
+            msgDiv.innerHTML += `<div id="${typingId}" style="margin-bottom: 15px; background: #e3f2fd; padding: 12px 15px; border-radius: 18px 18px 18px 2px; max-width: 85%; font-size: 14px; color: #7986cb; font-style: italic; border: 1px solid #bbdefb; opacity: 0.8;">✨ AI Düşünüyor...</div>`;
+            msgDiv.scrollTop = msgDiv.scrollHeight;
+
             try {
-                // Python FastAPI sunucuna bağlanıyoruz (Port 8000)
+                // 3. Önce C# veritabanımızdan güncel ürün listesini çekiyoruz
+                const dbResponse = await fetch('/Home/BotIcinUrunleriGetir');
+                const dbData = await dbResponse.json();
+                const veritabaniUrunleri = dbData.urunler;
+
+                // 4. Python sunucusuna BAĞLANIYORUZ (Hem soruyu hem ürünleri gönderiyoruz)
                 const response = await fetch('http://127.0.0.1:8000/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: userText })
+                    body: JSON.stringify({
+                        question: userText,
+                        products: veritabaniUrunleri
+                    })
                 });
+
                 const data = await response.json();
 
-                // AI cevabını ekle
-                msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #f1f1f1; padding: 10px; border-radius: 15px; max-width: 80%; font-size: 14px;">${data.answer}</div>`;
+                // 5. "Düşünüyor..." balonunu sil
+                document.getElementById(typingId).remove();
+
+               // 6. Gelen cevabı estetik hale getir
+                let formattedAnswer = data.answer
+                // Yapay zeka doğru formatta (Markdown) verirse:
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: #c2185b; font-weight: bold; text-decoration: underline;" target="_blank">$1</a>')
+
+                // YENİ: Yapay zeka tembellik edip düz link (/Home/ProductDetail/1016) verirse onu şık bir butona çevir:
+                .replace(/(\/Home\/ProductDetail\/\d+)/g, '<br><a href="$1" style="color: #c2185b; font-weight: bold; text-decoration: none; background-color: #fce4ec; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 5px; border: 1px solid #f8bbd0;" target="_blank">Ürünü İncele ✨</a>')
+
+                // Eski kodlar aynı kalıyor:
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1a237e;">$1</strong>')
+                .replace(/\n/g, '<br>')
+                .replace(/<br>\s*\*/g, '<br>&nbsp;&nbsp;•')
+                .replace(/^\s*\*/, '&nbsp;&nbsp;•');
+
+                // 7. AI cevabını ekrana bas (Buz Mavisi Balon)
+                msgDiv.innerHTML += `<div style="margin-bottom: 15px; background: #e3f2fd; padding: 12px 15px; border-radius: 18px 18px 18px 2px; max-width: 85%; font-size: 14px; color: #1a237e; border: 1px solid #bbdefb; line-height: 1.6;">${formattedAnswer}</div>`;
+
             } catch (error) {
-                msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #fee; color: red; padding: 10px; border-radius: 15px; font-size: 12px;">Henüz Python sunucusu çalışmıyor sanırım.</div>`;
+                // Hata olursa "Düşünüyor" balonunu silip uyarı ver (Eksik olan kısım burasıydı!)
+                document.getElementById(typingId).remove();
+                msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #fee; color: red; padding: 10px; border-radius: 15px; font-size: 12px;">Bağlantı koptu, tekrar dener misin?</div>`;
             }
+
             msgDiv.scrollTop = msgDiv.scrollHeight;
         }
     </script>

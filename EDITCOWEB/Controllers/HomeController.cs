@@ -281,5 +281,42 @@ namespace EDITCOWEB.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
+        [HttpGet]
+        public IActionResult BotIcinUrunleriGetir()
+        {
+            string botUrunListesi = "";
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                // DİKKAT: Artık 'Id' sütununu da çekiyoruz
+                string query = "SELECT Id, UrunAdi, CiltTipi, Aciklama, Fiyat FROM Products ORDER BY Id DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string id = reader["Id"].ToString();
+                            string urunAdi = reader["UrunAdi"].ToString();
+                            string ciltTipi = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "Tüm Ciltler";
+                            string aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "";
+                            string fiyat = reader["Fiyat"].ToString();
+
+                            // Ürünün detay sayfasına giden dinamik linki oluşturuyoruz
+                            string urunLink = $"/Home/ProductDetail/{id}";
+
+                            // Botun okuyacağı listeye Linki de ekledik
+                            botUrunListesi += $"- Ürün: {urunAdi} | Link: {urunLink} | Kimler İçin: {ciltTipi} | Ne İşe Yarar: {aciklama} | Fiyat: {fiyat} TL\n";
+                        }
+                    }
+                }
+            }
+
+            return Json(new { urunler = botUrunListesi });
+        }
     }
 }
