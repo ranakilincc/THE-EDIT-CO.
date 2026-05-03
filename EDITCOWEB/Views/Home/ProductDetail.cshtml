@@ -256,18 +256,43 @@
             setTimeout(function () { x.className = x.className.replace("goster", ""); }, 3000);
         }
 
-        // Sepete Ekleme Fonksiyonu (Artık C# Modelinden doğrudan veri alıyor)
-        function sepeteEkle() {
-            var sepet = JSON.parse(localStorage.getItem('sepetim')) || [];
-            sepet.push({
-                ad: "@Html.Raw(Model.UrunAdi)",
-                resim: "@Html.Raw(Model.ResimYolu)",
-                fiyat: "@Html.Raw(Model.Fiyat.ToString("N0")) TL",
-                adet: 1
-            });
-            localStorage.setItem('sepetim', JSON.stringify(sepet));
-            localStorage.setItem('sepetSayisi', sepet.length);
-            bildirimGoster("Ürün başarıyla sepete eklendi!");
+               //  SQL Uyumlu Sepete Ekleme Fonksiyonu
+        async function sepeteEkle() {
+            try {
+                // Chatbotun kullandığı CartController/Add metoduna istek atıyoruz
+                const response = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'productId': '@Model.Id', // C# modelinden ID'yi alıyoruz
+                        'quantity': 1
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Toast bildirimini göster
+                    bildirimGoster(data.message);
+
+                    // --- KRİTİK: SAYACI GÜNCELLE ---
+                    // Eğer bu sayfa Layout kullanmıyorsa updateCartBadge çalışmayabilir,
+                    // ancak sepet sayfasında her şey jilet gibi görünecek.
+                    if (typeof updateCartBadge === "function") {
+                        updateCartBadge();
+                    }
+                } else {
+                    alert(data.message || "Giriş yapmanız gerekebilir.");
+                    if(data.message.includes("oturum")) {
+                        window.location.href = "/Account/Login";
+                    }
+                }
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Sepete eklenirken bir hata oluştu.");
+            }
         }
 
         // Favorilere Ekleme Fonksiyonu (C# Modelinden veri alıyor)

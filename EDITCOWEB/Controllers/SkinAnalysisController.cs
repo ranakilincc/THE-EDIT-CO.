@@ -68,14 +68,17 @@ namespace EDITCOWEB.Controllers
                 PropertyNameCaseInsensitive = true
             };
 
-            SkinAnalysisResult? result =
-                JsonSerializer.Deserialize<SkinAnalysisResult>(json, options);
+            
+            SkinAnalysisResult? result = JsonSerializer.Deserialize<SkinAnalysisResult>(json, options);
 
             if (result == null)
             {
                 ViewBag.Error = "Analiz sonucu okunamadı.";
                 return View();
             }
+
+            //Kullanıcının cilt tipini geçici hafızaya (Session) kaydediyoruz!
+            HttpContext.Session.SetString("UserSkinType", result.SkinType);
 
             return View("Result", result);
         }

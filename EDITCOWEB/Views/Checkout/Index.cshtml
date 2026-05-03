@@ -244,11 +244,18 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Sepetten gelen fiyatı çekiyoruz
-        var gelenFiyat = localStorage.getItem("odenecekTutar");
-        if (gelenFiyat) {
-            document.getElementById("checkout-final-price").innerText = gelenFiyat + " TL";
+        // Sepet sayfasından gelen veriyi çek
+        const tutar = localStorage.getItem("odenecekTutar") || localStorage.getItem("indirimliToplam");
+
+        // İŞTE BURAYI DÜZELTTİK: HTML'deki doğru ID'yi (checkout-final-price) yazdık
+        const tutarGosterge = document.getElementById("checkout-final-price");
+
+        if (tutar && tutarGosterge) {
+            // Gelen veriyi sayıya çevirip 2 basamaklı formatla gösterelim
+            const sayiTutar = parseFloat(tutar);
+            if (!isNaN(sayiTutar)) {
+                tutarGosterge.innerText = sayiTutar.toFixed(2).replace(".", ",") + " TL";
+            }
         }
     });
 </script>
-

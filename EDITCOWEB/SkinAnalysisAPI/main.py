@@ -199,3 +199,8 @@ async def analyze(file: UploadFile = File(...)):
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
+
+
+if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(app, host="127.0.0.1", port=8001)

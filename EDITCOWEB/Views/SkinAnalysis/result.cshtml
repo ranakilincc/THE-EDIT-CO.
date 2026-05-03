@@ -76,3 +76,28 @@
         <a href="/#urunler" class="result-btn">Ürünleri İncele</a>
     </div>
 </div>
+
+
+<script>
+    // Sayfa açıldığında bu fonksiyon otomatik çalışır
+    window.onload = function() {
+        // Modelden gelen güncel cilt tipini alıyoruz (Örn: Yağlı Cilt)
+        var enGuncelTip = "@Model.SkinType";
+
+        if (enGuncelTip) {
+            var formData = new FormData();
+            formData.append("ciltTipi", enGuncelTip);
+
+            // C# tarafındaki metodumuza gönderiyoruz
+            fetch('/Home/CiltTipiniKaydet', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Hafıza başarıyla fotoğraf sonucuna göre güncellendi: " + enGuncelTip);
+            })
+            .catch(error => console.error("Güncelleme hatası:", error));
+        }
+    };
+</script>

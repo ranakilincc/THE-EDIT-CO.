@@ -283,15 +283,40 @@ namespace EDITCOWEB.Controllers
         }
 
 
+
         [HttpGet]
         public IActionResult BotIcinUrunleriGetir()
         {
-            string botUrunListesi = "";
+            // 1. Giriş yapan kullanıcının e-mail bilgisini alıyoruz
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+            string userSkinType = "Bilinmiyor";
 
+            // 2. Eğer kullanıcı giriş yapmışsa, SQL'den onun kalıcı cilt tipini çekiyoruz
+            if (!string.IsNullOrEmpty(userEmail))
+            {
+                using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    con.Open();
+                    string query = "SELECT CiltTipi FROM Users WHERE Email = @email";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@email", userEmail);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            userSkinType = result.ToString();
+                            // O anki oturumda da hızlı erişim için Session'a yazalım
+                            HttpContext.Session.SetString("UserSkinType", userSkinType);
+                        }
+                    }
+                }
+            }
+
+            // 3. Botun ürünleri önerebilmesi için veritabanındaki tüm ürün listesini hazırlıyoruz
+            string botUrunListesi = "";
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
                 con.Open();
-                // DİKKAT: Artık 'Id' sütununu da çekiyoruz
                 string query = "SELECT Id, UrunAdi, CiltTipi, Aciklama, Fiyat FROM Products ORDER BY Id DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
@@ -302,21 +327,145 @@ namespace EDITCOWEB.Controllers
                         {
                             string id = reader["Id"].ToString();
                             string urunAdi = reader["UrunAdi"].ToString();
-                            string ciltTipi = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "Tüm Ciltler";
+                            string ciltTipiUrun = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "Tüm Ciltler";
                             string aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "";
                             string fiyat = reader["Fiyat"].ToString();
-
-                            // Ürünün detay sayfasına giden dinamik linki oluşturuyoruz
                             string urunLink = $"/Home/ProductDetail/{id}";
 
-                            // Botun okuyacağı listeye Linki de ekledik
-                            botUrunListesi += $"- Ürün: {urunAdi} | Link: {urunLink} | Kimler İçin: {ciltTipi} | Ne İşe Yarar: {aciklama} | Fiyat: {fiyat} TL\n";
+                            botUrunListesi += $"- Ürün: {urunAdi} | Link: {urunLink} | Kimler İçin: {ciltTipiUrun} | Ne İşe Yarar: {aciklama} | Fiyat: {fiyat} TL\n";
                         }
                     }
                 }
             }
 
-            return Json(new { urunler = botUrunListesi });
+            // 4. JavaScript'e (Chatbot Arayüzüne) hem ürünleri hem de müşterinin cilt tipini paketleyip gönderiyoruz
+            return Json(new
+            {
+                urunler = botUrunListesi,
+                ciltTipi = userSkinType
+            });
         }
+
+
+        [HttpPost]
+        public IActionResult CiltTipiniKaydet([FromForm] string ciltTipi)
+        {
+            // 1. Giriş yapan kullanıcının emailini sessiondan alıyoruz (Senin sisteminde muhtemelen "UserEmail" veya "Email"dir)
+            string userEmail = HttpContext.Session.GetString("UserEmail");
+
+            if (!string.IsNullOrEmpty(userEmail))
+            {
+                // 2. SQL'e kalıcı olarak yazıyoruz
+                using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+                {
+                    con.Open();
+                    string query = "UPDATE Users SET CiltTipi = @cilt WHERE Email = @email";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@cilt", ciltTipi);
+                        cmd.Parameters.AddWithValue("@email", userEmail);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            // 3. Yine de o anki sayfa yenilenmeden chatbotun bilmesi için Session'a da yazalım
+            HttpContext.Session.SetString("UserSkinType", ciltTipi);
+
+            return Json(new { basari = true });
+        }
+        public IActionResult CiltTesti()
+        {
+            // Giriş yapmamışsa Login sayfasına postala
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserEmail")))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Chat(string message)
+        {
+            // 1. KESİN GİRİŞ KONTROLÜ
+            var loginKontrol = HttpContext.Session.GetString("UserEmail");
+
+            if (string.IsNullOrEmpty(loginKontrol))
+            {
+                return Json(new
+                {
+                    error = "auth_required",
+                    message = "Ürün önerileri alabilmek ve cilt tipini kaydetmek için giriş yapman veya kayıt olman gerekiyor. ✨",
+                    link = "/Account/Login"
+                });
+            }
+
+            // 2. HAFIZA TAZELEME VE İSİM ÇEKME
+            string userSkinType = "Bilinmiyor";
+            string userName = "Kullanıcı"; // Varsayılan değer
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                // Hem CiltTipi hem de FirstName (Ad) bilgisini çekiyoruz
+                string queryUser = "SELECT CiltTipi, FirstName FROM Users WHERE Email = @email";
+                using (SqlCommand cmd = new SqlCommand(queryUser, con))
+                {
+                    cmd.Parameters.AddWithValue("@email", loginKontrol);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            userSkinType = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "Bilinmiyor";
+                            userName = reader["FirstName"] != DBNull.Value ? reader["FirstName"].ToString() : "Kullanıcı";
+                        }
+                    }
+                }
+            }
+
+            // 3. ÜRÜN LİSTESİNİ ÇEKME
+            string botUrunListesi = "";
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+                string queryUrun = "SELECT UrunAdi, CiltTipi, Aciklama, Fiyat, Id FROM Products";
+                using (SqlCommand cmdUrun = new SqlCommand(queryUrun, con))
+                {
+                    using (SqlDataReader reader = cmdUrun.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            botUrunListesi += $"- Ürün: {reader["UrunAdi"]} | Link: /Home/ProductDetail/{reader["Id"]} | Tip: {reader["CiltTipi"]} | Fiyat: {reader["Fiyat"]} TL\n";
+                        }
+                    }
+                }
+            }
+
+            // 4. PYTHON SUNUCUSUNA GÖNDERME
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(new[]
+                    {
+                 new KeyValuePair<string, string>("message", message),
+                 new KeyValuePair<string, string>("urunler", botUrunListesi),
+                 new KeyValuePair<string, string>("cilt_tipi", userSkinType),
+                 // YENİ: Python'a kullanıcının gerçek ismini gönderiyoruz
+                 new KeyValuePair<string, string>("user_name", userName)
+             });
+
+                    var response = await client.PostAsync("http://127.0.0.1:8001/chat", content);
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return Content(responseString, "application/json");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { answer = "Bağlantı hatası: Lütfen Python (8001) sunucusunu başlatın!" });
+            }
+        }
+
     }
 }
+

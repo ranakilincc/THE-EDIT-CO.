@@ -86,10 +86,11 @@ namespace EDITCOWEB.Controllers
 
                 if (result == PasswordVerificationResult.Success)
                 {
-                    HttpContext.Session.SetString(
-                        "UserEmail",
-                        reader["Email"].ToString()
-                    );
+                    
+                    // Sadece Email değil, ismi de Session'a atıyoruz.
+                    HttpContext.Session.SetString("UserEmail", reader["Email"].ToString());
+                    HttpContext.Session.SetString("FirstName", reader["FirstName"].ToString());
+                    // --------------------------------
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -98,8 +99,8 @@ namespace EDITCOWEB.Controllers
             ViewBag.Error = "E-posta veya şifre hatalı";
             return View();
         }
-    
-       
+
+
         // ================= PROFILE =================
 
         [HttpGet]

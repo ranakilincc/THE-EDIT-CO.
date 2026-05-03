@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+
     <style>
         /* Toast Kutusu CSS */
         #toast-kutusu {
@@ -116,6 +117,62 @@
             .btn-sonuclarigoster:hover {
                 background-color: #d4989c;
             }
+
+        /* Botun önerdiği her bir ürün bloğu için */
+        .bot-product-card {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0; /* Ürünler arası boşluk */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+            .bot-product-card b {
+                color: #d18692; /* Ürün ismi vurgusu */
+                display: block;
+                margin-bottom: 5px;
+            }
+
+
+
+        /* Başlık içindeki metin ve butonu dikeyde hizalar */
+        .chat-header-content {
+            display: flex;
+            flex-direction: column; /* Üst üste binmeleri için */
+            align-items: flex-start;
+            gap: 8px; /* Yazı ile buton arasındaki mesafe */
+            margin-top: 5px;
+        }
+
+        .pdf-download-btn {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e0a6aa; /* İkonların pembe tonu */
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            /* İŞTE DEĞİŞİKLİK BURADA: Mesafeyi açıyoruz */
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+
+            .pdf-download-btn:hover {
+                background-color: #d48b91;
+                transform: scale(1.03);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            }
+
+            .pdf-download-btn svg {
+                margin-right: 5px;
+            }
+
     </style>
 </head>
 <body>
@@ -170,7 +227,7 @@
 
             <a href="#yeni-gelenler">Yeni Gelenler</a>
             <a href="#kampanyalar">Kampanyalar</a>
-            <a href="/cilt-tipi-testi.html" style="color: #e0a6aa; font-weight: bold; margin-left: 15px; text-decoration: none;">
+            <a href="/Home/CiltTesti" style="color: #e0a6aa; font-weight: bold; margin-left: 15px; text-decoration: none;">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> Cilt Tipini Öğren
             </a>
         </div>
@@ -186,7 +243,7 @@
             </a>
             <a href="/Cart/Index" style="position: relative; display: inline-block; text-decoration: none; color: black; margin-right: 20px;">
                 <i class="bi bi-bag" style="font-size: 1.5rem;"></i>
-                <span id="sepet-sayisi" style="position: absolute; top: -5px; right: -8px; background-color: #e0a6aa; color: white; border-radius: 50%; font-size: 11px; font-weight: bold; padding: 2px 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">0</span>
+                <span id="sepet-sayisi-badge" style="position: absolute; top: -5px; right: -8px; background-color: #e0a6aa; color: white; border-radius: 50%; font-size: 11px; font-weight: bold; padding: 2px 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">0</span>
             </a>
 
             @if (Context.Session.GetString("UserEmail") == null)
@@ -208,15 +265,7 @@
     <div id="toast-kutusu"><i class="fa-solid fa-check"></i> Ürün sepete eklendi!</div>
 
     <script>
-        // Sepet Sayısı Güncelleme
-        document.addEventListener("DOMContentLoaded", function() {
-            var kayitliSayi = localStorage.getItem('sepetSayisi');
-            var sepetRozeti = document.getElementById("sepet-sayisi");
-            if (kayitliSayi && sepetRozeti) {
-                sepetRozeti.innerText = kayitliSayi;
-            }
-        });
-
+        
         // Toast Bildirim
         function bildirimGoster(mesaj) {
             var x = document.getElementById("toast-kutusu");
@@ -312,8 +361,20 @@
                 <span style="font-size: 1rem; font-weight: bold; letter-spacing: 0.5px;">THE EDIT CO. AI</span>
             </div>
             <p style="font-size: 0.75rem; margin-top: 5px; opacity: 0.8; color: #e3f2fd;">Yapay Zeka Uzmanı Çevrimiçi</p>
+
+            <!-- PDF İndirme Butonu -->
+            <button onclick="indirRecete()" class="pdf-download-btn" title="Reçetemi PDF Olarak İndir">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708L8.5 10.293z" />
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+                </svg>
+                <span>Reçeteyi İndir</span>
+            </button>
+
             <span onclick="toggleChat()" style="position: absolute; top: 20px; right: 20px; cursor: pointer; color: white; font-size: 1.2rem; opacity: 0.7;">✕</span>
+
         </div>
+
 
         <div id="messages" style="flex: 1; padding: 20px; overflow-y: auto; background: #ffffff;">
             <div style="margin-bottom: 15px; background: #e3f2fd; /* Buz Mavisi */ padding: 12px 15px; border-radius: 18px 18px 18px 2px; max-width: 85%; font-size: 14px; color: #1a237e; /* Koyu Mavi Yazı */ border: 1px solid #bbdefb;">
@@ -329,81 +390,233 @@
         </div>
     </div>
 
+
+    <!-- KÜTÜPHANELER -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script>
-        function toggleChat() {
-            const chatBox = document.getElementById('chat-box');
-            if (chatBox.style.display === 'none' || chatBox.style.display === '') {
-                chatBox.style.display = 'flex';
-            } else {
-                chatBox.style.display = 'none';
+        // --- 1. SEPET VE BİLDİRİM FONKSİYONLARI ---
+        function updateCartBadge() {
+            $.ajax({
+                url: "/Cart/GetCartCount",
+                type: "GET",
+                success: function (count) {
+                    let badge = document.getElementById("sepet-sayisi-badge");
+                    if (badge) {
+                        badge.innerText = count;
+                        badge.style.display = count > 0 ? "flex" : "none";
+                    }
+                },
+                error: function () {
+                    console.log("Sepet sayısı çekilemedi.");
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            localStorage.removeItem('sepetSayisi');
+            localStorage.removeItem('sepetim');
+            updateCartBadge();
+        });
+
+        function bildirimGoster(mesaj) {
+            var x = document.getElementById("toast-kutusu");
+            if (mesaj) x.innerHTML = '<i class="fa-solid fa-check"></i> ' + mesaj;
+            x.className = "goster";
+            setTimeout(function(){ x.className = x.className.replace("goster", ""); }, 3000);
+        }
+
+        // --- 2. FAVORİ VE MENÜ FONKSİYONLARI ---
+        document.addEventListener("DOMContentLoaded", function() {
+            favoriSayaciniGuncelle();
+        });
+
+        function favoriSayaciniGuncelle() {
+            var favoriler = JSON.parse(localStorage.getItem('favorilerim')) || [];
+            var sayi = favoriler.length;
+            var rozet = document.getElementById("fav-sayisi-badge");
+            if (rozet) {
+                rozet.innerText = sayi;
+                rozet.style.display = sayi > 0 ? "flex" : "none";
             }
         }
 
-        // Python API'sine mesaj gönderen ve arayüzü yöneten fonksiyon
+        document.addEventListener('DOMContentLoaded', function() {
+            const urunlerButonu = document.getElementById('urunlerMenuButonu');
+            const filtreMenusu = document.getElementById('filtreMegaMenu');
+            if(urunlerButonu && filtreMenusu) {
+                urunlerButonu.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    filtreMenusu.classList.toggle('goster');
+                });
+                document.addEventListener('click', function(e) {
+                    const kapsayici = document.getElementById('urunlerDropdownKapsayici');
+                    if (kapsayici && !kapsayici.contains(e.target)) {
+                        filtreMenusu.classList.remove('goster');
+                    }
+                });
+                filtreMenusu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        // --- 3. CHATBOT FONKSİYONLARI ---
+        function toggleChat() {
+            const chatBox = document.getElementById('chat-box');
+            if (chatBox) {
+                if (chatBox.style.display === 'none' || chatBox.style.display === '') {
+                    chatBox.style.display = 'flex';
+                } else {
+                    chatBox.style.display = 'none';
+                }
+            }
+        }
+
         async function sendToAI() {
             const input = document.getElementById('userInput');
             const msgDiv = document.getElementById('messages');
             const userText = input.value.trim();
 
-            if (!userText) return; // Boş mesaj gönderilmesini engelle
+            if (!userText) return;
 
-            // 1. Kullanıcı mesajını ekrana ekle (Toz Pembe Balon)
             msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #e0a6aa; color: white; padding: 10px; border-radius: 15px; max-width: 80%; margin-left: auto; font-size: 14px;">${userText}</div>`;
             input.value = "";
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
-            // 2. Bekleme (Düşünüyor...) Balonunu Ekle (Lila-Mavi İtalik Yazı)
             const typingId = "typing-" + Date.now();
             msgDiv.innerHTML += `<div id="${typingId}" style="margin-bottom: 15px; background: #e3f2fd; padding: 12px 15px; border-radius: 18px 18px 18px 2px; max-width: 85%; font-size: 14px; color: #7986cb; font-style: italic; border: 1px solid #bbdefb; opacity: 0.8;">✨ AI Düşünüyor...</div>`;
             msgDiv.scrollTop = msgDiv.scrollHeight;
 
             try {
-                // 3. Önce C# veritabanımızdan güncel ürün listesini çekiyoruz
                 const dbResponse = await fetch('/Home/BotIcinUrunleriGetir');
                 const dbData = await dbResponse.json();
                 const veritabaniUrunleri = dbData.urunler;
+                const kullaniciCildi = dbData.ciltTipi;
 
-                // 4. Python sunucusuna BAĞLANIYORUZ (Hem soruyu hem ürünleri gönderiyoruz)
                 const response = await fetch('http://127.0.0.1:8000/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: userText,
-                        products: veritabaniUrunleri
+                        products: veritabaniUrunleri,
+                        skinType: kullaniciCildi,
+                        userName: "@Context.Session.GetString("FirstName")"
                     })
                 });
 
                 const data = await response.json();
 
-                // 5. "Düşünüyor..." balonunu sil
-                document.getElementById(typingId).remove();
+                const typingElement = document.getElementById(typingId);
+                if (typingElement) typingElement.remove();
 
-               // 6. Gelen cevabı estetik hale getir
-                let formattedAnswer = data.answer
-                // Yapay zeka doğru formatta (Markdown) verirse:
-                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: #c2185b; font-weight: bold; text-decoration: underline;" target="_blank">$1</a>')
+                let formattedAnswer = data.answer.replace(/\[(.*?)\]\((\/Home\/ProductDetail\/(\d+))\)\s*(?:-\s*)?([\s\S]*?)(?=\[|$|<br>|\n)/g, function(match, name, link, id, description) {
+                    let cleanDesc = description.replace(/<br>/g, "").trim();
+                    return `
+                    <div style="background: white; border: 1px solid #fce4ec; border-radius: 12px; padding: 10px; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 4px solid #e0a6aa; width: 220px; box-sizing: border-box;">
+                        <div style="margin-bottom: 8px;">
+                            <strong style="color: #1a237e; font-size: 13px; display: block;">${name}</strong>
+                            <span style="color: #666; font-size: 11px; display: block; margin-top: 3px; line-height: 1.3;">${cleanDesc}</span>
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-start;">
+                            <a href="${link}" target="_blank" style="background-color: #fce4ec; color: #c2185b; font-size: 10px; font-weight: bold; text-decoration: none; padding: 4px 8px; border-radius: 13px; display: inline-flex; align-items: center ; justify-content: center; white-space: nowrap; flex: 1; border: none;">Ürünü İncele ✨</a>
+                            <button onclick="addToCartDirect(${id})" style="background-color:  #fce4ec; color:#c2185b; font-size: 10px; font-weight: bold; border: none;  padding: 4px 8px;  border-radius: 13px; cursor: pointer; display: inline-flex; align-items: center ; justify-content: center; white-space: nowrap; flex: 1;">Sepete Ekle 🛒</button>
+                        </div>
+                    </div><br>`;
+                }).replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1a237e;">$1</strong>').replace(/\n/g, '<br>');
 
-                // YENİ: Yapay zeka tembellik edip düz link (/Home/ProductDetail/1016) verirse onu şık bir butona çevir:
-                .replace(/(\/Home\/ProductDetail\/\d+)/g, '<br><a href="$1" style="color: #c2185b; font-weight: bold; text-decoration: none; background-color: #fce4ec; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 5px; border: 1px solid #f8bbd0;" target="_blank">Ürünü İncele ✨</a>')
-
-                // Eski kodlar aynı kalıyor:
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1a237e;">$1</strong>')
-                .replace(/\n/g, '<br>')
-                .replace(/<br>\s*\*/g, '<br>&nbsp;&nbsp;•')
-                .replace(/^\s*\*/, '&nbsp;&nbsp;•');
-
-                // 7. AI cevabını ekrana bas (Buz Mavisi Balon)
                 msgDiv.innerHTML += `<div style="margin-bottom: 15px; background: #e3f2fd; padding: 12px 15px; border-radius: 18px 18px 18px 2px; max-width: 85%; font-size: 14px; color: #1a237e; border: 1px solid #bbdefb; line-height: 1.6;">${formattedAnswer}</div>`;
 
             } catch (error) {
-                // Hata olursa "Düşünüyor" balonunu silip uyarı ver (Eksik olan kısım burasıydı!)
-                document.getElementById(typingId).remove();
-                msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #fee; color: red; padding: 10px; border-radius: 15px; font-size: 12px;">Bağlantı koptu, tekrar dener misin?</div>`;
+                console.error("Hata detayı:", error);
+                const typingElement = document.getElementById(typingId);
+                if (typingElement) typingElement.remove();
+                msgDiv.innerHTML += `<div style="margin-bottom: 10px; background: #fee; color: red; padding: 10px; border-radius: 15px; font-size: 12px;">Google API şu an yoğun Rana, lütfen 1 dakika sonra tekrar dene. ✨</div>`;
             }
-
             msgDiv.scrollTop = msgDiv.scrollHeight;
         }
-    </script>
 
+        function indirRecete() {
+            // İŞTE KRİTİK DÜZELTME: Sadece ana mesaj balonlarını seçmek için "> div" kullanıyoruz
+            const mesajlar = document.querySelectorAll('#messages > div');
+            let sonBotMesajiHTML = "";
+
+            for (let i = mesajlar.length - 1; i >= 0; i--) {
+                if (mesajlar[i].innerHTML.includes("Ürünü İncele") || mesajlar[i].innerHTML.includes("Sepete Ekle")) {
+                    sonBotMesajiHTML = mesajlar[i].innerHTML;
+                    break;
+                }
+            }
+
+            if (!sonBotMesajiHTML) {
+                alert("Analiz verisi bulunamadı. Lütfen önce bot ile bir rutin oluşturun.");
+                return;
+            }
+
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = sonBotMesajiHTML;
+
+            // TEMİZLİK: PDF'te butonlar görünmesin diye tüm 'a' (link) ve 'button' etiketlerini siliyoruz
+            let butonlar = tempDiv.querySelectorAll('button, a');
+            butonlar.forEach(el => el.remove());
+
+            let temizIcerik = tempDiv.innerHTML;
+
+            let pdfSablonu = `
+            <style>
+                div, p, li { page-break-inside: avoid !important; break-inside: avoid !important; }
+            </style>
+            <div style="padding: 20px; font-family: 'Helvetica', 'Arial', sans-serif; background-color: #fffafb;">
+                <div style="text-align: center; border-bottom: 2px solid #e0a6aa; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h1 style="color: #4a3b3b; font-family: 'Times New Roman', serif; margin: 0; font-size: 32px; letter-spacing: 2px;">THE EDIT CO.</h1>
+                    <p style="color: #e0a6aa; font-size: 14px; margin-top: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Kişiselleştirilmiş Cilt Bakım Reçetesi</p>
+                </div>
+                <div style="line-height: 1.8; font-size: 15px; color: #333;">
+                    ${temizIcerik}
+                </div>
+                <div style="margin-top: 50px; text-align: center; font-size: 11px; color: #888; border-top: 1px solid #f0d9dc; padding-top: 20px;">
+                    <p style="margin: 0;">Bu reçete <strong>The Edit Co. Yapay Zeka Asistanı</strong> tarafından size özel olarak hazırlanmıştır.</p>
+                    <p style="margin: 5px 0 0 0;">Tarih: ${new Date().toLocaleDateString('tr-TR')} | www.theeditco.com</p>
+                </div>
+            </div>
+            `;
+
+            var ayarlar = {
+                margin:       10,
+                filename:     'TheEditCo_Cilt_Recetesi.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['css', 'avoid-all'] }
+            };
+
+            html2pdf().set(ayarlar).from(pdfSablonu).save();
+        }
+
+        async function addToCartDirect(productId) {
+            if (productId == 0 || !productId) {
+                alert("Hata: Ürün ID'si bulunamadı!");
+                return;
+            }
+            try {
+                const response = await fetch('/Cart/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ 'productId': productId, 'quantity': 1 })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    if (typeof updateCartBadge === "function") updateCartBadge();
+                } else {
+                    alert(data.message || "Sepete eklenirken bir sorun oluştu.");
+                }
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("Bir hata oluştu, lütfen tekrar dene.");
+            }
+        }
+    </script>
 </body>
 </html>
