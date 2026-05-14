@@ -202,7 +202,7 @@ namespace EDITCOWEB.Controllers
                 cmd.Parameters.AddWithValue("@Kod", kod.ToUpper());
                 cmd.Parameters.AddWithValue("@IndirimYuzdesi", indirimYuzdesi);
                 cmd.Parameters.AddWithValue("@BitisTarihi", bitisTarihi);
-                cmd.Parameters.AddWithValue("@AltLimit", altLimit); 
+                cmd.Parameters.AddWithValue("@AltLimit", altLimit);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
@@ -445,5 +445,45 @@ namespace EDITCOWEB.Controllers
             return RedirectToAction("Yorumlar");
         }
 
+        [HttpGet]
+        public IActionResult Customers()
+        {
+            List<CustomerViewModel> customers = new List<CustomerViewModel>();
+
+            // Veritabanı bağlantı cümleni alıyoruz
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+
+                // DİKKAT: Veritabanındaki 'Users' tablonun sütun isimleri farklıysa burayı ona göre güncelle.
+                // Eğer tablonuzda 'LastLoginDate' diye bir sütun yoksa, şimdilik sorgudan çıkarabilirsin.
+                string query = "SELECT Id, FirstName, LastName, Email, CreatedAt, CiltTipi FROM Users";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            customers.Add(new EDITCOWEB.Models.CustomerViewModel
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                // Veritabanında null gelme ihtimaline karşı kontroller ekliyoruz
+                                FirstName = reader["FirstName"] != DBNull.Value ? reader["FirstName"].ToString() : "İsimsiz",
+                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
+                                Email = reader["Email"].ToString(),
+                                CreatedAt = reader["CreatedAt"] != DBNull.Value ? Convert.ToDateTime(reader["CreatedAt"]) : (DateTime?)null,
+                                CiltTipi = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "Belirtilmemiş"
+                            });
+                        }
+                    }
+                }
+
+                return View(customers);
+            }
+
+        }
     }
 }
