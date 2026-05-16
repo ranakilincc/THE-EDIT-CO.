@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TheEditCo.Models
+namespace EDITCOWEB.Models
 {
     public class CheckoutViewModel
     {
