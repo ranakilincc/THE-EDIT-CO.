@@ -291,7 +291,7 @@ namespace EDITCOWEB.Controllers
 
         // 2. Formdan Gelen Ürün Bilgilerini ve Resmi Kaydeden Metot
         [HttpPost]
-        public IActionResult AddProduct(string urunAdi, string kategori, decimal fiyat, int stokMiktari, string aciklama, IFormFile resimDosyasi)
+        public IActionResult AddProduct(string urunAdi, string kategori, decimal fiyat, int stokMiktari, string aciklama, string ciltTipi, string kullanimZamani, string nasilKullanilir, string hacim, string hedefSorunlar, string icerikler, IFormFile resimDosyasi)
         {
             var adminEmail = HttpContext.Session.GetString("AdminEmail");
             if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
@@ -322,7 +322,7 @@ namespace EDITCOWEB.Controllers
                 // D) Veritabanına (SQL) Kayıt İşlemi
                 using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
                 {
-                    string query = "INSERT INTO Products (UrunAdi, Kategori, Fiyat, Aciklama, ResimYolu, StokMiktari) VALUES (@UrunAdi, @Kategori, @Fiyat, @Aciklama, @ResimYolu, @StokMiktari)";
+                    string query = "INSERT INTO Products (UrunAdi, Kategori, Fiyat, Aciklama, ResimYolu, StokMiktari, CiltTipi, KullanimZamani, NasilKullanilir, Hacim, HedefSorunlar, Icerikler) VALUES (@UrunAdi, @Kategori, @Fiyat, @Aciklama, @ResimYolu, @StokMiktari, @CiltTipi, @KullanimZamani, @NasilKullanilir, @Hacim, @HedefSorunlar, @Icerikler)";
                     SqlCommand cmd = new SqlCommand(query, con);
 
                     cmd.Parameters.AddWithValue("@UrunAdi", urunAdi);
@@ -331,6 +331,12 @@ namespace EDITCOWEB.Controllers
                     cmd.Parameters.AddWithValue("@Aciklama", aciklama ?? "");
                     cmd.Parameters.AddWithValue("@ResimYolu", dbResimYolu);
                     cmd.Parameters.AddWithValue("@StokMiktari", stokMiktari);
+                    cmd.Parameters.AddWithValue("@CiltTipi", ciltTipi ?? "");
+                    cmd.Parameters.AddWithValue("@KullanimZamani", kullanimZamani ?? "");
+                    cmd.Parameters.AddWithValue("@NasilKullanilir", nasilKullanilir ?? "");
+                    cmd.Parameters.AddWithValue("@Hacim", hacim ?? "");
+                    cmd.Parameters.AddWithValue("@HedefSorunlar", hedefSorunlar ?? "");
+                    cmd.Parameters.AddWithValue("@Icerikler", icerikler ?? "");
 
                     con.Open();
                     cmd.ExecuteNonQuery();
@@ -340,6 +346,150 @@ namespace EDITCOWEB.Controllers
             // İşlem başarıyla bitince bizi tekrar Ürünler listesine göndersin
             return RedirectToAction("Products");
         }
+        // ================= ÜRÜN DÜZENLEME (GET) =================
+        // AdminController.cs içinde DeleteProduct metodunun ÜSTÜNE ekle
+
+        [HttpGet]
+        public IActionResult EditProduct(int id)
+        {
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            Product urun = null;
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                string query = "SELECT * FROM Products WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                con.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        urun = new Product
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            UrunAdi = reader["UrunAdi"].ToString(),
+                            Kategori = reader["Kategori"].ToString(),
+                            Fiyat = Convert.ToDecimal(reader["Fiyat"]),
+                            Aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "",
+                            ResimYolu = reader["ResimYolu"].ToString(),
+                            StokMiktari = Convert.ToInt32(reader["StokMiktari"]),
+                            CiltTipi = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "",
+                            KullanimZamani = reader["KullanimZamani"] != DBNull.Value ? reader["KullanimZamani"].ToString() : "",
+                            NasilKullanilir = reader["NasilKullanilir"] != DBNull.Value ? reader["NasilKullanilir"].ToString() : "",
+                            Hacim = reader["Hacim"] != DBNull.Value ? reader["Hacim"].ToString() : "",
+                            HedefSorunlar = reader["HedefSorunlar"] != DBNull.Value ? reader["HedefSorunlar"].ToString() : "",
+                            Icerikler = reader["Icerikler"] != DBNull.Value ? reader["Icerikler"].ToString() : ""
+                        };
+                    }
+                }
+            }
+
+            if (urun == null) return RedirectToAction("Products");
+
+            return View(urun);
+        }
+
+        // ================= ÜRÜN DÜZENLEME (POST) =================
+        [HttpPost]
+        public IActionResult EditProduct(int id, string urunAdi, string kategori, decimal fiyat, int stokMiktari,
+            string aciklama, string ciltTipi, string kullanimZamani, string nasilKullanilir,
+            string hacim, string hedefSorunlar, string icerikler, IFormFile resimDosyasi)
+        {
+            var adminEmail = HttpContext.Session.GetString("AdminEmail");
+            if (string.IsNullOrEmpty(adminEmail)) return RedirectToAction("AdminLogin", "Account");
+
+            // Eğer yeni resim yüklendiyse kaydet, yoksa eski resmi koru
+            string yeniResimYolu = null;
+
+            if (resimDosyasi != null && resimDosyasi.Length > 0)
+            {
+                string klasorYolu = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+
+                if (!Directory.Exists(klasorYolu))
+                    Directory.CreateDirectory(klasorYolu);
+
+                string dosyaAdi = Guid.NewGuid().ToString() + Path.GetExtension(resimDosyasi.FileName);
+                string tamYol = Path.Combine(klasorYolu, dosyaAdi);
+
+                using (var stream = new FileStream(tamYol, FileMode.Create))
+                {
+                    resimDosyasi.CopyTo(stream);
+                }
+
+                yeniResimYolu = "/images/products/" + dosyaAdi;
+            }
+
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Open();
+
+                string query;
+
+                if (yeniResimYolu != null)
+                {
+                    // Yeni resim varsa ResimYolu da güncelle
+                    query = @"UPDATE Products SET
+                        UrunAdi = @UrunAdi,
+                        Kategori = @Kategori,
+                        Fiyat = @Fiyat,
+                        StokMiktari = @StokMiktari,
+                        Aciklama = @Aciklama,
+                        CiltTipi = @CiltTipi,
+                        KullanimZamani = @KullanimZamani,
+                        NasilKullanilir = @NasilKullanilir,
+                        Hacim = @Hacim,
+                        HedefSorunlar = @HedefSorunlar,
+                        Icerikler = @Icerikler,
+                        ResimYolu = @ResimYolu
+                      WHERE Id = @Id";
+                }
+                else
+                {
+                    // Yeni resim yoksa ResimYolu'nu dokunma
+                    query = @"UPDATE Products SET
+                        UrunAdi = @UrunAdi,
+                        Kategori = @Kategori,
+                        Fiyat = @Fiyat,
+                        StokMiktari = @StokMiktari,
+                        Aciklama = @Aciklama,
+                        CiltTipi = @CiltTipi,
+                        KullanimZamani = @KullanimZamani,
+                        NasilKullanilir = @NasilKullanilir,
+                        Hacim = @Hacim,
+                        HedefSorunlar = @HedefSorunlar,
+                        Icerikler = @Icerikler
+                      WHERE Id = @Id";
+                }
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@UrunAdi", urunAdi);
+                    cmd.Parameters.AddWithValue("@Kategori", kategori);
+                    cmd.Parameters.AddWithValue("@Fiyat", fiyat);
+                    cmd.Parameters.AddWithValue("@StokMiktari", stokMiktari);
+                    cmd.Parameters.AddWithValue("@Aciklama", aciklama ?? "");
+                    cmd.Parameters.AddWithValue("@CiltTipi", ciltTipi ?? "");
+                    cmd.Parameters.AddWithValue("@KullanimZamani", kullanimZamani ?? "");
+                    cmd.Parameters.AddWithValue("@NasilKullanilir", nasilKullanilir ?? "");
+                    cmd.Parameters.AddWithValue("@Hacim", hacim ?? "");
+                    cmd.Parameters.AddWithValue("@HedefSorunlar", hedefSorunlar ?? "");
+                    cmd.Parameters.AddWithValue("@Icerikler", icerikler ?? "");
+
+                    if (yeniResimYolu != null)
+                        cmd.Parameters.AddWithValue("@ResimYolu", yeniResimYolu);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            return RedirectToAction("Products");
+        }
+
 
         // ================= ÜRÜN SİLME =================
         public IActionResult DeleteProduct(int id)

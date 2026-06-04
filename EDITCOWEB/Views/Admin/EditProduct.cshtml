@@ -1,4 +1,5 @@
-﻿@{
+﻿@model EDITCOWEB.Models.Product
+@{
     Layout = null;
 }
 
@@ -7,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Edit Co. | Yeni Ürün Ekle</title>
+    <title>The Edit Co. | Ürün Düzenle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body {
@@ -18,7 +19,6 @@
             height: 100vh;
         }
 
-        /* Sol Menü */
         .sidebar {
             width: 260px;
             background-color: #333;
@@ -71,7 +71,6 @@
             transition: 0.3s;
         }
 
-        /* Sağ İçerik */
         .ana-icerik {
             flex-grow: 1;
             display: flex;
@@ -93,7 +92,6 @@
             overflow-y: auto;
         }
 
-        /* Form Stilleri */
         .form-kapsayici {
             background: white;
             border-radius: 12px;
@@ -113,9 +111,9 @@
             border-bottom: 2px solid #f9efef;
         }
 
-            .bolum-baslik:first-child {
-                margin-top: 0;
-            }
+        .bolum-baslik:first-child {
+            margin-top: 0;
+        }
 
         .form-satiri {
             display: flex;
@@ -171,6 +169,30 @@
                 font-size: 12px;
             }
 
+        .mevcut-resim {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            background: #fdf6f6;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #f0e0e0;
+        }
+
+            .mevcut-resim img {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 6px;
+                border: 1px solid #eee;
+            }
+
+            .mevcut-resim span {
+                font-size: 13px;
+                color: #888;
+            }
+
         .btn-kaydet {
             background-color: #e0a6aa;
             color: white;
@@ -220,14 +242,17 @@
 
     <div class="ana-icerik">
         <div class="ust-bar">
-            <h2 style="margin:0;">Yeni Ürün Ekle</h2>
+            <h2 style="margin:0;">Ürün Düzenle</h2>
         </div>
 
         <div class="icerik-alani">
             <a href="/Admin/Products" class="geri-link"><i class="fa-solid fa-arrow-left"></i> Ürünlere Dön</a>
 
             <div class="form-kapsayici">
-                <form action="/Admin/AddProduct" method="post" enctype="multipart/form-data">
+                <form action="/Admin/EditProduct" method="post" enctype="multipart/form-data">
+
+                    <!-- Ürün ID'sini gizli olarak gönderiyoruz -->
+                    <input type="hidden" name="id" value="@Model.Id" />
 
                     <!-- TEMEL BİLGİLER -->
                     <div class="bolum-baslik"><i class="fa-solid fa-box" style="margin-right:6px;"></i>Temel Bilgiler</div>
@@ -235,32 +260,32 @@
                     <div class="form-satiri">
                         <div class="form-grup" style="flex: 2;">
                             <label>Ürün Adı *</label>
-                            <input type="text" name="urunAdi" placeholder="Örn: Retinol Gece Bakım Serumu" required>
+                            <input type="text" name="urunAdi" value="@Model.UrunAdi" required>
                         </div>
                         <div class="form-grup" style="flex: 1;">
                             <label>Kategori *</label>
-                            <select name="kategori" required>
-                                <option value="Serum">Serum</option>
-                                <option value="Nemlendirici">Nemlendirici</option>
-                                <option value="Temizleyici">Temizleyici</option>
-                                <option value="Tonik">Tonik</option>
-                                <option value="Güneş Kremi">Güneş Kremi</option>
-                            </select>
+                         <select name="kategori" required>
+    @if (Model.Kategori == "Serum") { <option value="Serum" selected>Serum</option> } else { <option value="Serum">Serum</option> }
+    @if (Model.Kategori == "Nemlendirici") { <option value="Nemlendirici" selected>Nemlendirici</option> } else { <option value="Nemlendirici">Nemlendirici</option> }
+    @if (Model.Kategori == "Temizleyici") { <option value="Temizleyici" selected>Temizleyici</option> } else { <option value="Temizleyici">Temizleyici</option> }
+    @if (Model.Kategori == "Tonik") { <option value="Tonik" selected>Tonik</option> } else { <option value="Tonik">Tonik</option> }
+    @if (Model.Kategori == "Güneş Kremi") { <option value="Güneş Kremi" selected>Güneş Kremi</option> } else { <option value="Güneş Kremi">Güneş Kremi</option> }
+</select>
                         </div>
                     </div>
 
                     <div class="form-satiri">
                         <div class="form-grup">
                             <label>Fiyat (TL) *</label>
-                            <input type="number" name="fiyat" step="0.01" placeholder="Örn: 450.50" required>
+                            <input type="number" name="fiyat" step="0.01" value="@Model.Fiyat" required>
                         </div>
                         <div class="form-grup">
                             <label>Stok Miktarı *</label>
-                            <input type="number" name="stokMiktari" value="100" required>
+                            <input type="number" name="stokMiktari" value="@Model.StokMiktari" required>
                         </div>
                         <div class="form-grup">
                             <label>Hacim</label>
-                            <input type="text" name="hacim" placeholder="Örn: 30ml, 50ml">
+                            <input type="text" name="hacim" value="@Model.Hacim" placeholder="Örn: 30ml">
                         </div>
                     </div>
 
@@ -272,28 +297,91 @@
                             <label>Uygun Cilt Tipi</label>
                             <select name="ciltTipi">
                                 <option value="">Seçiniz</option>
-                                <option value="Tüm Ciltler">Tüm Ciltler</option>
-                                <option value="Yağlı">Yağlı</option>
-                                <option value="Kuru">Kuru</option>
-                                <option value="Karma">Karma</option>
-                                <option value="Hassas">Hassas</option>
-                                <option value="Normal">Normal</option>
+                                @if (Model.CiltTipi == "Tüm Ciltler")
+                                {
+                                    <option value="Tüm Ciltler" selected>Tüm Ciltler</option>
+                                }
+                                else
+                                {
+                                    <option value="Tüm Ciltler">Tüm Ciltler</option>
+                                }
+                                @if (Model.CiltTipi == "Yağlı")
+                                {
+                                    <option value="Yağlı" selected>Yağlı</option>
+                                }
+                                else
+                                {
+                                    <option value="Yağlı">Yağlı</option>
+                                }
+                                @if (Model.CiltTipi == "Kuru")
+                                {
+                                    <option value="Kuru" selected>Kuru</option>
+                                }
+                                else
+                                {
+                                    <option value="Kuru">Kuru</option>
+                                }
+                                @if (Model.CiltTipi == "Karma")
+                                {
+                                    <option value="Karma" selected>Karma</option>
+                                }
+                                else
+                                {
+                                    <option value="Karma">Karma</option>
+                                }
+                                @if (Model.CiltTipi == "Hassas")
+                                {
+                                    <option value="Hassas" selected>Hassas</option>
+                                }
+                                else
+                                {
+                                    <option value="Hassas">Hassas</option>
+                                }
+                                @if (Model.CiltTipi == "Normal")
+                                {
+                                    <option value="Normal" selected>Normal</option>
+                                }
+                                else
+                                {
+                                    <option value="Normal">Normal</option>
+                                }
                             </select>
                         </div>
                         <div class="form-grup">
                             <label>Kullanım Zamanı</label>
                             <select name="kullanimZamani">
                                 <option value="">Seçiniz</option>
-                                <option value="Gece">Gece</option>
-                                <option value="Gündüz">Gündüz</option>
-                                <option value="Gece & Gündüz">Gece & Gündüz</option>
+                                @if (Model.KullanimZamani == "Gece")
+                                {
+                                    <option value="Gece" selected>Gece</option>
+                                }
+                                else
+                                {
+                                    <option value="Gece">Gece</option>
+                                }
+                                @if (Model.KullanimZamani == "Gündüz")
+                                {
+                                    <option value="Gündüz" selected>Gündüz</option>
+                                }
+                                else
+                                {
+                                    <option value="Gündüz">Gündüz</option>
+                                }
+                                @if (Model.KullanimZamani == "Gece & Gündüz")
+                                {
+                                    <option value="Gece & Gündüz" selected>Gece & Gündüz</option>
+                                }
+                                else
+                                {
+                                    <option value="Gece & Gündüz">Gece & Gündüz</option>
+                                }
                             </select>
                         </div>
                     </div>
 
                     <div class="form-grup">
                         <label>Hedef Sorunlar</label>
-                        <input type="text" name="hedefSorunlar" placeholder="Örn: Gözenek, Kırışıklık, Leke, Kuruluk">
+                        <input type="text" name="hedefSorunlar" value="@Model.HedefSorunlar" placeholder="Örn: Gözenek, Kırışıklık, Leke">
                         <small>Virgülle ayırarak yazın</small>
                     </div>
 
@@ -302,29 +390,35 @@
 
                     <div class="form-grup">
                         <label>Ürün Açıklaması</label>
-                        <textarea name="aciklama" placeholder="Ürünün faydaları ve genel açıklaması..."></textarea>
+                        <textarea name="aciklama">@Model.Aciklama</textarea>
                     </div>
 
                     <div class="form-grup">
                         <label>Nasıl Kullanılır?</label>
-                        <textarea name="nasilKullanilir" placeholder="Örn: Akşam temizliğinin ardından birkaç damla alın, yüzünüze nazikçe masaj yaparak uygulayın."></textarea>
+                        <textarea name="nasilKullanilir">@Model.NasilKullanilir</textarea>
                     </div>
 
                     <div class="form-grup">
                         <label>İçindekiler</label>
-                        <textarea name="icerikler" placeholder="Örn: Retinol, Hyaluronic Acid, Niacinamide, Vitamin E, Squalane..."></textarea>
+                        <textarea name="icerikler">@Model.Icerikler</textarea>
                         <small>Tam içerik listesini buraya yapıştırabilirsiniz</small>
                     </div>
 
                     <!-- GÖRSEL -->
                     <div class="bolum-baslik"><i class="fa-solid fa-image" style="margin-right:6px;"></i>Ürün Görseli</div>
 
-                    <div class="form-grup">
-                        <label>Görsel Yükle *</label>
-                        <input type="file" name="resimDosyasi" accept="image/*" required>
+                    <div class="mevcut-resim">
+                        <img src="@Model.ResimYolu" alt="Mevcut Görsel">
+                        <span>Mevcut görsel. Değiştirmek istemiyorsanız boş bırakın.</span>
                     </div>
 
-                    <button type="submit" class="btn-kaydet"><i class="fa-solid fa-check"></i> Ürünü Kaydet</button>
+                    <div class="form-grup">
+                        <label>Yeni Görsel Yükle (İsteğe Bağlı)</label>
+                        <input type="file" name="resimDosyasi" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="btn-kaydet"><i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Kaydet</button>
+                
                 </form>
             </div>
         </div>

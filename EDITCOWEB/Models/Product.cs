@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace EDITCOWEB.Models
 {
     public class Product
@@ -15,5 +14,12 @@ namespace EDITCOWEB.Models
         public DateTime EklenmeTarihi { get; set; }
         public double OrtalamaPuan { get; set; }
         public int YorumSayisi { get; set; }
+
+        // 🆕 YENİ ALANLAR
+        public string KullanimZamani { get; set; }    // "Gece", "Gündüz", "Gece & Gündüz"
+        public string NasilKullanilir { get; set; }   // Kullanım talimatı
+        public string Hacim { get; set; }             // "30ml", "50ml" vb.
+        public string HedefSorunlar { get; set; }     // "Gözenek, Kırışıklık, Leke" vb.
+        public string Icerikler { get; set; }         // İçindekiler listesi
     }
 }

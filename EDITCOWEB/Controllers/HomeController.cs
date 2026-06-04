@@ -173,7 +173,15 @@ namespace EDITCOWEB.Controllers
                             Fiyat = Convert.ToDecimal(reader["Fiyat"]),
                             Aciklama = reader["Aciklama"] != DBNull.Value ? reader["Aciklama"].ToString() : "",
                             ResimYolu = reader["ResimYolu"].ToString(),
-                            StokMiktari = Convert.ToInt32(reader["StokMiktari"])
+                            StokMiktari = Convert.ToInt32(reader["StokMiktari"]),
+                            CiltTipi = reader["CiltTipi"] != DBNull.Value ? reader["CiltTipi"].ToString() : "",
+
+                            // 🆕 YENİ ALANLAR
+                            KullanimZamani = reader["KullanimZamani"] != DBNull.Value ? reader["KullanimZamani"].ToString() : "",
+                            NasilKullanilir = reader["NasilKullanilir"] != DBNull.Value ? reader["NasilKullanilir"].ToString() : "",
+                            Hacim = reader["Hacim"] != DBNull.Value ? reader["Hacim"].ToString() : "",
+                            HedefSorunlar = reader["HedefSorunlar"] != DBNull.Value ? reader["HedefSorunlar"].ToString() : "",
+                            Icerikler = reader["Icerikler"] != DBNull.Value ? reader["Icerikler"].ToString() : ""
                         };
                     }
                 }

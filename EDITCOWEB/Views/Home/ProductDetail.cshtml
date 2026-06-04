@@ -144,6 +144,64 @@
             <h1 id="u-baslik">@Model.UrunAdi</h1>
             <div id="u-fiyat" class="fiyat">@Model.Fiyat.ToString("N0") TL</div>
             <p id="u-aciklama" class="aciklama">@Model.Aciklama</p>
+           
+            <!-- ÜRÜN DETAY KARTLARI -->
+            <div style="margin: 20px 0; display: flex; flex-direction: column; gap: 12px;">
+
+                @if (!string.IsNullOrEmpty(Model.CiltTipi))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">🧴 Uygun Cilt Tipleri</strong>
+                        <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px;">
+                            @foreach (var tip in Model.CiltTipi.Split(','))
+                            {
+                                <span style="background:#e0a6aa; color:white; border-radius:20px; padding:3px 12px; font-size:0.82rem;">@tip.Trim()</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.KullanimZamani))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">🌙 Kullanım Zamanı</strong>
+                        <p style="margin:6px 0 0; color:#555;">@Model.KullanimZamani</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Hacim))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">📦 Hacim</strong>
+                        <p style="margin:6px 0 0; color:#555;">@Model.Hacim</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.HedefSorunlar))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">🎯 Hedef Sorunlar</strong>
+                        <p style="margin:6px 0 0; color:#555;">@Model.HedefSorunlar</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.NasilKullanilir))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">📋 Nasıl Kullanılır?</strong>
+                        <p style="margin:6px 0 0; color:#555; line-height:1.6;">@Model.NasilKullanilir</p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Icerikler))
+                {
+                    <div style="background:#fdf6f6; border-radius:10px; padding:14px 18px; border-left: 3px solid #e0a6aa;">
+                        <strong style="color:#c47a7a;">🧪 İçindekiler</strong>
+                        <p style="margin:6px 0 0; color:#888; font-size:0.82rem; line-height:1.6;">@Model.Icerikler</p>
+                    </div>
+                }
+
+            </div>
 
             <button onclick="favoriyeEkle()" onmouseover="this.style.backgroundColor='#c48b90'; this.style.transform='translateY(-3px)';" onmouseout="this.style.backgroundColor='#e0a6aa'; this.style.transform='translateY(0)';" class="btn" style="width: 100%; margin-bottom: 15px; background-color: #e0a6aa; color: white; border: none; padding: 15px 0; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(224, 166, 170, 0.2);">
                 <i id="fav-ikon" class="fa-regular fa-heart"></i>
